@@ -18,7 +18,7 @@ namespace LeagueThemedRPGBot
             // create a bot client config incl. token
             var config = new DiscordConfiguration
             {
-                Token = "OTc5OTAwMjQ5ODY4OTkyNTYy.GhN2uP.gJ6uf1AvKKrPmGtoCxrJzueJ9IRoPeLaH9azm0",
+                Token = "Woops!",
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
                 MinimumLogLevel = LogLevel.Debug,
