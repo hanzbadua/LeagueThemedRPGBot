@@ -1,0 +1,114 @@
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using Microsoft.Extensions.Logging;
+using LeagueThemedRPGBot.Commands;
+
+namespace LeagueThemedRPGBot
+{
+    public class BotClient
+    {
+        public readonly EventId BotLoggingEvent = new (0, "BotLogging");
+        public DiscordClient Client { get; set; }
+        public CommandsNextExtension Commands { get; set; }
+
+        public async Task RunBotAsync() {
+            // create a bot client config incl. token
+            var config = new DiscordConfiguration
+            {
+                Token = "OTc5OTAwMjQ5ODY4OTkyNTYy.GhN2uP.gJ6uf1AvKKrPmGtoCxrJzueJ9IRoPeLaH9azm0",
+                TokenType = TokenType.Bot,
+                AutoReconnect = true,
+                MinimumLogLevel = LogLevel.Debug,
+                Intents = DiscordIntents.AllUnprivileged
+            };
+
+            // instantiate our bot client
+            Client = new DiscordClient(config);
+
+            // register logging events related to our client
+            Client.Ready += OnReady;
+            Client.GuildAvailable += OnGuildAvailable;
+            Client.ClientErrored += OnClientError;
+            
+            // create command configuration
+            var commandConfig = new CommandsNextConfiguration {
+                StringPrefixes = new[] { "$" },
+                EnableDms = true,
+                EnableMentionPrefix = true
+            };
+
+            // register command config to our bot client
+            Commands = Client.UseCommandsNext(commandConfig);
+
+            // register logging events related to our commands
+            Commands.CommandExecuted += OnCommandExecute;
+            Commands.CommandErrored += OnCommandError;
+
+            // register commands
+            Commands.RegisterCommands<MainCommands>();
+            Commands.RegisterCommands<DebugCommands>();
+
+            // connect the client + log in
+            await Client.ConnectAsync();
+
+            // run the bot client permanently in background, until close
+            await Task.Delay(-1);
+        }
+
+        private async Task OnReady(DiscordClient dc, ReadyEventArgs args)
+        {
+            dc.Logger.LogInformation(BotLoggingEvent, "Client is ready to process events");
+            return;
+        }
+
+        private async Task OnGuildAvailable(DiscordClient dc, GuildCreateEventArgs args)
+        {
+            dc.Logger.LogInformation(BotLoggingEvent, $"Available guild: {args.Guild.Name}");
+            return;
+        }
+
+        private async Task OnClientError(DiscordClient dc, ClientErrorEventArgs args)
+        {
+            dc.Logger.LogError(BotLoggingEvent, args.Exception, "Exception occured");
+            return;
+        }
+
+        private async Task OnCommandExecute(CommandsNextExtension cmds, CommandExecutionEventArgs args)
+        {
+            args.Context.Client.Logger.LogInformation(BotLoggingEvent, $"{args.Context.User.Username} successfully executed '{args.Command.QualifiedName}'");
+            return;
+        }
+
+        private async Task OnCommandError(CommandsNextExtension cmds, CommandErrorEventArgs args)
+        {
+            args.Context.Client.Logger.LogDebug(BotLoggingEvent, (cmds.Client == Client).ToString());
+            args.Context.Client.Logger.LogError(BotLoggingEvent, $"{args.Context.User.Username} tried executing '{args.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {args.Exception.GetType()}: {args.Exception.Message ?? "<no message>"}", DateTime.Now);
+            // command doesn't exist
+            if (args.Exception is CommandNotFoundException)
+            {
+                await args.Context.Message.CreateReactionAsync(DiscordEmoji.FromName(cmds.Client, ":question:"));
+                /*
+                await args.Context.RespondAsync(new DiscordEmbedBuilder()
+                {
+                    Title = "Command not found", 
+                    Description = "This command appears to be invalid", 
+                    Color = new DiscordColor(0xFF0000) // red
+                });
+                */
+            }
+            // permissions not valid
+            else if (args.Exception is ChecksFailedException)
+            {
+                await args.Context.RespondAsync(new DiscordEmbedBuilder()
+                {
+                    Title = "Access denied",
+                    Description = "You do not have the permissions required to use this command",
+                    Color = new DiscordColor(0xFF0000) // red
+                });
+            }
+        }
+    }
+}
