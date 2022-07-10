@@ -19,7 +19,7 @@ namespace LeagueThemedRPGBot.Commands
             }
 
             Player.Data[ctx.User.Id] = new Player();
-            await Data.SaveData(Data.PlayerDataLocation, Player.Data);
+            await Data.SaveFileData(Data.PlayerDataLocation, Player.Data);
 
             await ctx.RespondAsync("Character initialized");
         }
@@ -74,7 +74,7 @@ namespace LeagueThemedRPGBot.Commands
         {
             if (!await PlayerIsInited(ctx)) return;
             if (await InventoryIsEmpty(ctx)) return;
-            
+
             var msg = new DiscordEmbedBuilder
             {
                 Title = "Inventory",
@@ -112,37 +112,37 @@ namespace LeagueThemedRPGBot.Commands
 
             if ((item.Type == ItemType.Weapon || item.Type == ItemType.Armor || item.Type == ItemType.Boots) && item.Stats is not null)
             {
-                if (item.Stats.MaxHealth != 0) 
+                if (item.Stats.MaxHealth != 0)
                     msg.AddField("Max Health", item.Stats.MaxHealth.ToString());
 
-                if (item.Stats.MaxMana != 0) 
+                if (item.Stats.MaxMana != 0)
                     msg.AddField("Max Mana", item.Stats.MaxMana.ToString());
 
-                if (item.Stats.AttackDamage != 0) 
+                if (item.Stats.AttackDamage != 0)
                     msg.AddField("Attack Damage", item.Stats.AttackDamage.ToString());
 
-                if (item.Stats.AbilityPower != 0) 
+                if (item.Stats.AbilityPower != 0)
                     msg.AddField("Ability Power", item.Stats.AbilityPower.ToString());
 
-                if (item.Stats.CritChance != 0) 
+                if (item.Stats.CritChance != 0)
                     msg.AddField("Crit Chance", item.Stats.CritChance.ToString());
 
-                if (item.Stats.CritDamage != 0) 
+                if (item.Stats.CritDamage != 0)
                     msg.AddField("Crit Damage", item.Stats.CritDamage.ToString());
 
-                if (item.Stats.ArmorPenPercent != 0 || item.Stats.ArmorPenFlat != 0) 
+                if (item.Stats.ArmorPenPercent != 0 || item.Stats.ArmorPenFlat != 0)
                     msg.AddField("Armor Pen (flat|%)", $"{item.Stats.ArmorPenFlat} | {item.Stats.ArmorPenPercent}%");
 
-                if (item.Stats.MagicPenPercent != 0 || item.Stats.MagicPenFlat != 0) 
+                if (item.Stats.MagicPenPercent != 0 || item.Stats.MagicPenFlat != 0)
                     msg.AddField("Magic Pen (flat|%)", $"{item.Stats.MagicPenFlat} | {item.Stats.MagicPenPercent}%");
 
-                if (item.Stats.Omnivamp != 0) 
+                if (item.Stats.Omnivamp != 0)
                     msg.AddField("Omnivamp", item.Stats.Omnivamp.ToString());
 
-                if (item.Stats.Armor != 0) 
+                if (item.Stats.Armor != 0)
                     msg.AddField("Armor", item.Stats.Armor.ToString());
 
-                if (item.Stats.MagicResist != 0) 
+                if (item.Stats.MagicResist != 0)
                     msg.AddField("Magic Resist", item.Stats.MagicResist.ToString());
             }
 
@@ -248,8 +248,8 @@ namespace LeagueThemedRPGBot.Commands
                             Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
                             return;
                         }
-                        else 
-                        { 
+                        else
+                        {
                             await AlreadyWearingEquipPattern(ctx, player, item, ItemReplacingSlotType.ArmorOne, index);
                             return;
                         }
@@ -291,7 +291,15 @@ namespace LeagueThemedRPGBot.Commands
             }
         }
 
-        // NOTE: remove later
+        // NOTE: remove later because it is a test command
+        [Command("addweapon"), Description("Add an item by name")]
+        public async Task AddWeapon(CommandContext ctx, string name)
+        {
+            if (!await PlayerIsInited(ctx)) return;
+            Player.Data[ctx.User.Id].Inventory.Add(Data.GetWeaponByName(name) ?? new Item());
+        }
+
+        // NOTE: remove later because useless
         [Command("penis"), Description("PENIS")] public async Task Penis(CommandContext c) => await c.RespondAsync("YUMMY!");
 
     }

@@ -11,7 +11,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("exit"), Description("Safely exit the bot client and save data"), Hidden, RequireOwner]
         public async Task Exit(CommandContext ctx)
         {
-            await Data.SaveData(Data.PlayerDataLocation, Player.Data);
+            await Data.SaveFileData(Data.PlayerDataLocation, Player.Data);
             await ctx.RespondAsync($"Exiting safely and saving data...");
             Environment.Exit(0);
         }
@@ -95,6 +95,7 @@ namespace LeagueThemedRPGBot.Commands
                 Description = "Description here",
                 Rarity = ItemRarity.Basic,
                 Type = ItemType.Weapon,
+                Value = 10,
                 Stats = new ItemStats
                 {
                 }

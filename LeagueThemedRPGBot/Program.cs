@@ -6,9 +6,13 @@ namespace LeagueThemedRPGBot
     {
         private static async Task Main(string[] args)
         {
-            Player.Data = await Data.LoadData<Dictionary<ulong, Player>>(Data.PlayerDataLocation);
+            Item.Weapons = await Data.LoadGameDataFromDirectory<Item>(Data.WeaponDataDirectory);
+            Player.Data = await Data.LoadFileData<Dictionary<ulong, Player>>(Data.PlayerDataLocation);
             var bot = new BotClient();
             await bot.RunBotAsync();
         }
     }
 }
+
+// todo: unequip implementation
+// better getitembyname lookup implementation
