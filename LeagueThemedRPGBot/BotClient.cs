@@ -3,6 +3,9 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using LeagueThemedRPGBot.Commands;
 
@@ -18,7 +21,7 @@ namespace LeagueThemedRPGBot
             // create a bot client config incl. token
             var config = new DiscordConfiguration
             {
-                Token = "Woops!",
+                Token = "",
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
                 MinimumLogLevel = LogLevel.Debug,
@@ -27,6 +30,13 @@ namespace LeagueThemedRPGBot
 
             // instantiate our bot client
             Client = new DiscordClient(config);
+
+            // allow our bot client to be 'interactive'
+            Client.UseInteractivity(new InteractivityConfiguration
+            {
+                PollBehaviour = PollBehaviour.KeepEmojis,
+                Timeout = TimeSpan.FromSeconds(15)
+            });
 
             // register logging events related to our client
             Client.Ready += OnReady;

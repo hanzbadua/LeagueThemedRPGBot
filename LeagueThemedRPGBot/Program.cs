@@ -6,7 +6,7 @@ namespace LeagueThemedRPGBot
     {
         private static async Task Main(string[] args)
         {
-            Globals.PlayerData = await DataHandler.LoadData<Dictionary<ulong, Player>>(DataHandler.PlayerDataLocation);
+            Player.Data = await Data.LoadData<Dictionary<ulong, Player>>(Data.PlayerDataLocation);
             var bot = new BotClient();
             await bot.RunBotAsync();
         }
