@@ -21,7 +21,7 @@ namespace LeagueThemedRPGBot
             // create a bot client config incl. token
             var config = new DiscordConfiguration
             {
-                Token = "OTc5OTAwMjQ5ODY4OTkyNTYy.Gqt0-Y.zwGSj62_wgRdwRxvcy1O-8NsE6Oc0MS09cAi_o",
+                Token = "",
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
                 MinimumLogLevel = LogLevel.Debug,
@@ -35,10 +35,10 @@ namespace LeagueThemedRPGBot
             Client.UseInteractivity(new InteractivityConfiguration
             {
                 PollBehaviour = PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromSeconds(15)
+                Timeout = TimeSpan.FromSeconds(10)
             });
 
-            // register logging events related to our client
+            // register events related to our client
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
             Client.ClientErrored += OnClientError;
@@ -53,7 +53,7 @@ namespace LeagueThemedRPGBot
             // register command config to our bot client
             Commands = Client.UseCommandsNext(commandConfig);
 
-            // register logging events related to our commands
+            // register events related to our commands
             Commands.CommandExecuted += OnCommandExecute;
             Commands.CommandErrored += OnCommandError;
 

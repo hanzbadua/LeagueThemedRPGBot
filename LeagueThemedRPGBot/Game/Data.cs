@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace LeagueThemedRPGBot.Game
 {
@@ -43,7 +44,7 @@ namespace LeagueThemedRPGBot.Game
             {
                 using var data = File.OpenRead(file);
                 var ds = await JsonSerializer.DeserializeAsync<T>(data, opt);
-                retval.Add(ds.ToString(), ds);
+                retval.Add(ds.ToString().RemoveWhitespace().ToLowerInvariant(), ds);
             }
 
             return retval;
@@ -51,15 +52,37 @@ namespace LeagueThemedRPGBot.Game
 
         public static Item GetWeaponByName(string name)
         {
-            if (Item.Weapons.ContainsKey(name)) return Item.Weapons[name];
+            name = name.RemoveWhitespace().ToLowerInvariant();
+            if (Item.Weapons.ContainsKey(name))
+                return Item.Weapons[name];
 
-            return null;
+            return FailsafeLongSword;
         }
+
+        public static readonly Item FailsafeLongSword = new()
+        {
+            Name = "Long Sword",
+            Description = "It hurts.",
+            Rarity = ItemRarity.Basic,
+            Type = ItemType.Weapon,
+            Stats = new()
+            {
+                AttackDamage = 10
+            }
+        };
+
+        private static readonly Regex whitespace = new(@"\s+");
+
+        public static Random Rng { get; } = new();
+
+        public static string RemoveWhitespace(this string s)
+            => whitespace.Replace(s, string.Empty);
 
         private static readonly JsonSerializerOptions opt = new()
         {
             ReferenceHandler = ReferenceHandler.Preserve,
             AllowTrailingCommas = true
         };
+
     }
 }

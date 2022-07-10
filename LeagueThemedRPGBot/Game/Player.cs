@@ -8,7 +8,7 @@ namespace LeagueThemedRPGBot.Game
     {
         // instanced data
         public int Level { get; set; } = 1;
-        public float XP { get; set; } = 0;
+        public int XP { get; set; } = 0;
         public int MaxHealth { get; set; } = 100;
         public int Health { get; set; } = 100;
         public int MaxMana { get; set; } = 50;
@@ -16,7 +16,7 @@ namespace LeagueThemedRPGBot.Game
         public int AttackDamage { get; set; } = 10;
         public int AbilityPower { get; set; } = 0;
         public int CritChance { get; set; } = 0;
-        public int CritDamage { get; set; } = 175;
+        public int BonusCritDamage { get; set; } = 0;
         public int ArmorPenPercent { get; set; } = 0;
         public int ArmorPenFlat { get; set; } = 0;
         public int MagicPenPercent { get; set; } = 0;
@@ -25,6 +25,7 @@ namespace LeagueThemedRPGBot.Game
         public int Armor { get; set; } = 0;
         public int MagicResist { get; set; } = 0;
         public int Gold /*MorbBucks*/ { get; set; } = 100;
+        public bool Busy { get; set; } = false;
 
         [JsonInclude]
         public List<Item> Inventory { get; set; } = new();
@@ -50,46 +51,46 @@ namespace LeagueThemedRPGBot.Game
         // statics
         public static Dictionary<ulong, Player> Data { get; set; }
 
-        public static Player AddStatsFromItem(Player p, Item i)
+        public void AddStatsFromItem(Item i)
         {
+            if (i.Stats is null) return;
+
             var s = i.Stats;
 
-            p.MaxHealth += s.MaxHealth;
-            p.MaxMana += s.MaxMana;
-            p.AttackDamage += s.AttackDamage;
-            p.AbilityPower += s.AbilityPower;
-            p.CritChance += s.CritChance;
-            p.CritDamage += s.CritDamage;
-            p.ArmorPenPercent += s.ArmorPenPercent;
-            p.ArmorPenFlat += s.ArmorPenFlat;
-            p.MagicPenPercent += s.MagicPenPercent;
-            p.MagicPenFlat += s.MagicPenFlat;
-            p.Omnivamp += s.Omnivamp;
-            p.Armor += s.Armor;
-            p.MagicResist += s.MagicResist;
-
-            return p;
+            MaxHealth += s.MaxHealth;
+            MaxMana += s.MaxMana;
+            AttackDamage += s.AttackDamage;
+            AbilityPower += s.AbilityPower;
+            CritChance += s.CritChance;
+            BonusCritDamage += s.CritDamage;
+            ArmorPenPercent += s.ArmorPenPercent;
+            ArmorPenFlat += s.ArmorPenFlat;
+            MagicPenPercent += s.MagicPenPercent;
+            MagicPenFlat += s.MagicPenFlat;
+            Omnivamp += s.Omnivamp;
+            Armor += s.Armor;
+            MagicResist += s.MagicResist;
         }
 
-        public static Player RemoveStatsFromItem(Player p, Item i)
+        public void RemoveStatsFromItem(Item i)
         {
+            if (i.Stats is null) return;
+
             var s = i.Stats;
 
-            p.MaxHealth -= s.MaxHealth;
-            p.MaxMana -= s.MaxMana;
-            p.AttackDamage -= s.AttackDamage;
-            p.AbilityPower -= s.AbilityPower;
-            p.CritChance -= s.CritChance;
-            p.CritDamage -= s.CritDamage;
-            p.ArmorPenPercent -= s.ArmorPenPercent;
-            p.ArmorPenFlat -= s.ArmorPenFlat;
-            p.MagicPenPercent -= s.MagicPenPercent;
-            p.MagicPenFlat -= s.MagicPenFlat;
-            p.Omnivamp -= s.Omnivamp;
-            p.Armor -= s.Armor;
-            p.MagicResist -= s.MagicResist;
-
-            return p;
+            MaxHealth -= s.MaxHealth;
+            MaxMana -= s.MaxMana;
+            AttackDamage -= s.AttackDamage;
+            AbilityPower -= s.AbilityPower;
+            CritChance -= s.CritChance;
+            BonusCritDamage -= s.CritDamage;
+            ArmorPenPercent -= s.ArmorPenPercent;
+            ArmorPenFlat -= s.ArmorPenFlat;
+            MagicPenPercent -= s.MagicPenPercent;
+            MagicPenFlat -= s.MagicPenFlat;
+            Omnivamp -= s.Omnivamp;
+            Armor -= s.Armor;
+            MagicResist -= s.MagicResist;
         }
 
         public static float CalculateXPForNextLevel(int currentLevel)

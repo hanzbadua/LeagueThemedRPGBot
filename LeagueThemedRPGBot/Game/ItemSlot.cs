@@ -1,6 +1,6 @@
 ﻿namespace LeagueThemedRPGBot.Game
 {
-    public enum ItemReplacingSlotType : int
+    public enum ItemSlot : int
     {
         MainWeapon = 0,
         OffhandWeapon = 1,

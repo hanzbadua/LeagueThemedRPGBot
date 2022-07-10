@@ -1,4 +1,5 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using LeagueThemedRPGBot.Game;
@@ -18,6 +19,18 @@ namespace LeagueThemedRPGBot.Commands
             }
 
             return true;
+        }
+
+        // initcheck this first
+        protected async Task<bool> PlayerIsBusy(CommandContext ctx)
+        {
+            if (Player.Data[ctx.User.Id].Busy == true)
+            {
+                await ctx.RespondAsync("You appear to be doing something else right now - please resolve that first");
+                return true;
+            }
+
+            return false;
         }
 
         // Remember to PlayerIsInited() before calling this!
@@ -47,9 +60,9 @@ namespace LeagueThemedRPGBot.Commands
         }
 
         // only use this after equip checks + with the context that the respective equip slot already has something equipped
-        protected async Task AlreadyWearingEquipPattern(CommandContext ctx, Player pl, Item item, ItemReplacingSlotType stype, int index)
+        protected async Task AlreadyWearingEquipPattern(CommandContext ctx, Player pl, Item item, ItemSlot stype, int index)
         {
-            if (item.Type == ItemType.Boots && stype == ItemReplacingSlotType.Boots)
+            if (item.Type == ItemType.Boots && stype == ItemSlot.Boots)
             {
                 var current = pl.Boots;
 
@@ -58,8 +71,8 @@ namespace LeagueThemedRPGBot.Commands
                 if (!rr.TimedOut)
                 {
                     Player.Data[ctx.User.Id].Boots = item;
-                    Player.Data[ctx.User.Id] = Player.AddStatsFromItem(Player.Data[ctx.User.Id], item);
-                    Player.Data[ctx.User.Id] = Player.RemoveStatsFromItem(Player.Data[ctx.User.Id], current);
+                    Player.Data[ctx.User.Id].AddStatsFromItem(item);
+                    Player.Data[ctx.User.Id].RemoveStatsFromItem(current);
                     Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
                     Player.Data[ctx.User.Id].Inventory.Add(current);
                     await ctx.RespondAsync("Boots replaced successfully");
@@ -70,7 +83,7 @@ namespace LeagueThemedRPGBot.Commands
             }
             else if (item.Type == ItemType.Weapon)
             {
-                if (stype == ItemReplacingSlotType.MainWeapon)
+                if (stype == ItemSlot.MainWeapon)
                 {
                     var current = pl.MainWeapon;
 
@@ -79,8 +92,8 @@ namespace LeagueThemedRPGBot.Commands
                     if (!rr.TimedOut)
                     {
                         Player.Data[ctx.User.Id].MainWeapon = item;
-                        Player.Data[ctx.User.Id] = Player.AddStatsFromItem(Player.Data[ctx.User.Id], item);
-                        Player.Data[ctx.User.Id] = Player.RemoveStatsFromItem(Player.Data[ctx.User.Id], current);
+                        Player.Data[ctx.User.Id].AddStatsFromItem(item);
+                        Player.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         Player.Data[ctx.User.Id].Inventory.Add(current);
                         await ctx.RespondAsync("Main weapon replaced successfully");
@@ -89,7 +102,7 @@ namespace LeagueThemedRPGBot.Commands
                         await ctx.RespondAsync("Timed out - no changes were made");
                     return;
                 }
-                else if (stype == ItemReplacingSlotType.OffhandWeapon)
+                else if (stype == ItemSlot.OffhandWeapon)
                 {
                     var current = pl.OffhandWeapon;
 
@@ -98,8 +111,8 @@ namespace LeagueThemedRPGBot.Commands
                     if (!rr.TimedOut)
                     {
                         Player.Data[ctx.User.Id].OffhandWeapon = item;
-                        Player.Data[ctx.User.Id] = Player.AddStatsFromItem(Player.Data[ctx.User.Id], item);
-                        Player.Data[ctx.User.Id] = Player.RemoveStatsFromItem(Player.Data[ctx.User.Id], current);
+                        Player.Data[ctx.User.Id].AddStatsFromItem(item);
+                        Player.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         Player.Data[ctx.User.Id].Inventory.Add(current);
                         await ctx.RespondAsync("Offhand weapon replaced successfully");
@@ -111,7 +124,7 @@ namespace LeagueThemedRPGBot.Commands
             }
             else if (item.Type == ItemType.Armor)
             {
-                if (stype == ItemReplacingSlotType.ArmorOne)
+                if (stype == ItemSlot.ArmorOne)
                 {
                     var current = pl.ArmorOne;
 
@@ -120,8 +133,8 @@ namespace LeagueThemedRPGBot.Commands
                     if (!rr.TimedOut)
                     {
                         Player.Data[ctx.User.Id].ArmorOne = item;
-                        Player.Data[ctx.User.Id] = Player.AddStatsFromItem(Player.Data[ctx.User.Id], item);
-                        Player.Data[ctx.User.Id] = Player.RemoveStatsFromItem(Player.Data[ctx.User.Id], current);
+                        Player.Data[ctx.User.Id].AddStatsFromItem(item);
+                        Player.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         Player.Data[ctx.User.Id].Inventory.Add(current);
                         await ctx.RespondAsync("Armor in slot one replaced successfully");
@@ -130,7 +143,7 @@ namespace LeagueThemedRPGBot.Commands
                         await ctx.RespondAsync("Timed out - no changes were made");
                     return;
                 }
-                else if (stype == ItemReplacingSlotType.ArmorTwo)
+                else if (stype == ItemSlot.ArmorTwo)
                 {
                     var current = pl.ArmorTwo;
 
@@ -139,8 +152,8 @@ namespace LeagueThemedRPGBot.Commands
                     if (!rr.TimedOut)
                     {
                         Player.Data[ctx.User.Id].ArmorTwo = item;
-                        Player.Data[ctx.User.Id] = Player.AddStatsFromItem(Player.Data[ctx.User.Id], item);
-                        Player.Data[ctx.User.Id] = Player.RemoveStatsFromItem(Player.Data[ctx.User.Id], current);
+                        Player.Data[ctx.User.Id].AddStatsFromItem(item);
+                        Player.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         Player.Data[ctx.User.Id].Inventory.Add(current);
                         await ctx.RespondAsync("Armor in slot two replaced successfully");
@@ -149,7 +162,7 @@ namespace LeagueThemedRPGBot.Commands
                         await ctx.RespondAsync("Timed out - no changes were made");
                     return;
                 }
-                else if (stype == ItemReplacingSlotType.ArmorThree)
+                else if (stype == ItemSlot.ArmorThree)
                 {
                     var current = pl.ArmorThree;
 
@@ -158,8 +171,8 @@ namespace LeagueThemedRPGBot.Commands
                     if (!rr.TimedOut)
                     {
                         Player.Data[ctx.User.Id].ArmorThree = item;
-                        Player.Data[ctx.User.Id] = Player.AddStatsFromItem(Player.Data[ctx.User.Id], item);
-                        Player.Data[ctx.User.Id] = Player.RemoveStatsFromItem(Player.Data[ctx.User.Id], current);
+                        Player.Data[ctx.User.Id].AddStatsFromItem(item);
+                        Player.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         Player.Data[ctx.User.Id].Inventory.Add(current);
                         await ctx.RespondAsync("Armor in slot three replaced successfully");
@@ -171,6 +184,68 @@ namespace LeagueThemedRPGBot.Commands
             }
         }
 
-        protected readonly DiscordColor DefBlue = new DiscordColor(0, 191, 255);
+        // Use after checking if the respective item slot is null (aka empty)
+        protected async Task UnequipLogic(CommandContext ctx, ItemSlot slot)
+        {
+            Item i = Data.FailsafeLongSword; // failsafe should never be used.
+
+            switch (slot)
+            {
+                case ItemSlot.ArmorOne:
+                    i = Player.Data[ctx.User.Id].ArmorOne;
+                    Player.Data[ctx.User.Id].ArmorOne = null;
+                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armorone`");
+                    break;
+                case ItemSlot.ArmorTwo:
+                    i = Player.Data[ctx.User.Id].ArmorTwo;
+                    Player.Data[ctx.User.Id].ArmorTwo = null;
+                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armortwo`");
+                    break;
+                case ItemSlot.ArmorThree:
+                    i = Player.Data[ctx.User.Id].ArmorThree;
+                    Player.Data[ctx.User.Id].ArmorThree = null;
+                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armorthree`");
+                    break;
+                case ItemSlot.MainWeapon:
+                    i = Player.Data[ctx.User.Id].MainWeapon;
+                    Player.Data[ctx.User.Id].MainWeapon = null;
+                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `mainweapon`");
+                    break;
+                case ItemSlot.OffhandWeapon:
+                    i = Player.Data[ctx.User.Id].OffhandWeapon;
+                    Player.Data[ctx.User.Id].OffhandWeapon = null;
+                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `offhandweapon`");
+                    break;
+                case ItemSlot.Boots:
+                    i = Player.Data[ctx.User.Id].Boots;
+                    Player.Data[ctx.User.Id].Boots = null;
+                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `boots`");
+                    break;
+            }
+
+            Player.Data[ctx.User.Id].Inventory.Add(i);
+            Player.Data[ctx.User.Id].RemoveStatsFromItem(i);
+        }
+
+        protected async Task CombatRoutine(CommandContext ctx, Enemy e)
+        {
+            string desc = $"{e.Name} approaches you! What do you do?";
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = $"Encounter: {e.Name}",
+                Description = desc
+            }
+            .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+
+            var swordEmoji = DiscordEmoji.FromName(ctx.Client, ":crossed_swords:");
+            var attackButton = new DiscordButtonComponent(ButtonStyle.Primary, "encounter_attack", $"Attack {swordEmoji}");
+            var msg = new DiscordMessageBuilder().AddEmbed(embed.Build()).AddComponents(attackButton);
+
+
+            var resp = await ctx.RespondAsync(msg);
+        }
+
+        protected readonly DiscordColor DefRed = new (255, 45, 0);
+        protected readonly DiscordColor DefBlue = new (0, 191, 255);
     }
 }

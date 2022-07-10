@@ -4,7 +4,7 @@ namespace LeagueThemedRPGBot
 {
     public class Program
     {
-        private static async Task Main(string[] args)
+        private static async Task Main()
         {
             Item.Weapons = await Data.LoadGameDataFromDirectory<Item>(Data.WeaponDataDirectory);
             Player.Data = await Data.LoadFileData<Dictionary<ulong, Player>>(Data.PlayerDataLocation);
@@ -14,5 +14,4 @@ namespace LeagueThemedRPGBot
     }
 }
 
-// todo: unequip implementation
-// better getitembyname lookup implementation
+// todo: implement full encounter
