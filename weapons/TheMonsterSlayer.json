@@ -1,0 +1,22 @@
+{
+	"Name": "The Monster Slayer",
+	"Description": "For Top Lane Enthusiasts",
+	"Rarity": 5,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 0,
+		"MaxMana": 0,
+		"AttackDamage": 20,
+		"AbilityPower": 0,
+		"CritChance": -100,
+		"CritDamage": 0,
+		"ArmorPenPercent": 100,
+		"ArmorPenFlat": 0,
+		"MagicPenPercent": 100,
+		"MagicPenFlat": 0,
+		"Omnivamp": 0,
+		"Armor": 0,
+		"MagicResist": 0,
+	}
+}

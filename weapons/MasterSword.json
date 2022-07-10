@@ -1,0 +1,22 @@
+{
+	"Name": "Master Sword",
+	"Description": "The Sword of A Legendary Hero!",
+	"Rarity": 5,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 150,
+		"MaxMana": 250,
+		"AttackDamage": 75,
+		"AbilityPower": 15,
+		"CritChance": 0,
+		"CritDamage": 0,
+		"ArmorPenPercent": 25,
+		"ArmorPenFlat": 0,
+		"MagicPenPercent": 20,
+		"MagicPenFlat": 0,
+		"Omnivamp": 10,
+		"Armor": 0,
+		"MagicResist": 0,
+	}
+}

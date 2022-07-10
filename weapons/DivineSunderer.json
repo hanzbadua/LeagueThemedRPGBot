@@ -1,0 +1,22 @@
+{
+	"Name": "Divine Sunderer",
+	"Description": "Anti Tank Bruiser Item",
+	"Rarity": 4,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 350,
+		"MaxMana": 0,
+		"AttackDamage": 35,
+		"AbilityPower": 15,
+		"CritChance": 0,
+		"CritDamage": 0,
+		"ArmorPenPercent": 30,
+		"ArmorPenFlat": 15,
+		"MagicPenPercent": 25,
+		"MagicPenFlat": 10,
+		"Omnivamp": 15,
+		"Armor": 10,
+		"MagicResist": 5
+	}
+}

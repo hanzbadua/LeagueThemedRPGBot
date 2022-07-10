@@ -1,0 +1,22 @@
+{
+	"Name": "Kraken Slayer",
+	"Description": "Anti-Tank Crit Item",
+	"Rarity": 4,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 0,
+		"MaxMana": 0,
+		"AttackDamage": 70,
+		"AbilityPower": 0,
+		"CritChance": 35,
+		"CritDamage": 20,
+		"ArmorPenPercent": 25,
+		"ArmorPenFlat": 10,
+		"MagicPenPercent": 15,
+		"MagicPenFlat": 10,
+		"Omnivamp": 0,
+		"Armor": 0,
+		"MagicResist": 0
+	}
+}

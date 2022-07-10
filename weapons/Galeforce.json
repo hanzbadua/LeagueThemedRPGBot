@@ -1,0 +1,22 @@
+{
+	"Name": "Galeforce",
+	"Description": "Mobility Crit Item",
+	"Rarity": 4,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 0,
+		"MaxMana": 0,
+		"AttackDamage": 65,
+		"AbilityPower": 0,
+		"CritChance": 35,
+		"CritDamage": 20,
+		"ArmorPenPercent": 15,
+		"ArmorPenFlat": 0,
+		"MagicPenPercent": 0,
+		"MagicPenFlat": 10,
+		"Omnivamp": 0,
+		"Armor": 0,
+		"MagicResist": 0
+	}
+}

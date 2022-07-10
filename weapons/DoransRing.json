@@ -1,0 +1,22 @@
+{
+	"Name": "Dorans Ring",
+	"Description": "For beginning mages",
+	"Rarity": 0,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 0,
+		"MaxMana": 150,
+		"AttackDamage": 0,
+		"AbilityPower": 15,
+		"CritChance": 0,
+		"CritDamage": 0,
+		"ArmorPenPercent": 0,
+		"ArmorPenFlat": 0,
+		"MagicPenPercent": 0,
+		"MagicPenFlat": 0,
+		"Omnivamp": 0,
+		"Armor": 0,
+		"MagicResist": 0,
+	}
+}

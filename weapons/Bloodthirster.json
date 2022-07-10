@@ -1,0 +1,22 @@
+{
+	"Name": "Bloodthirster",
+	"Description": "Lifesteal Drain Weapon - never die...",
+	"Rarity": 3,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 150,
+		"MaxMana": 0,
+		"AttackDamage": 50,
+		"AbilityPower": 0,
+		"CritChance": 25,
+		"CritDamage": 10,
+		"ArmorPenPercent": 0,
+		"ArmorPenFlat": 0,
+		"MagicPenPercent": 0,
+		"MagicPenFlat": 0,
+		"Omnivamp": 35,
+		"Armor": 0,
+		"MagicResist": 0
+	}
+}

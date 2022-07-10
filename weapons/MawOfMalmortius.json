@@ -1,0 +1,22 @@
+{
+	"Name": "Maw of Malmortius",
+	"Description": "Item to piss off AP assassins",
+	"Rarity": 3,
+	"Type": 2,
+	"Value": 10,
+	"Stats": {
+		"MaxHealth": 150,
+		"MaxMana": 0,
+		"AttackDamage": 45,
+		"AbilityPower": 0,
+		"CritChance": 0,
+		"CritDamage": 0,
+		"ArmorPenPercent": 0,
+		"ArmorPenFlat": 0,
+		"MagicPenPercent": 0,
+		"MagicPenFlat": 0,
+		"Omnivamp": 20,
+		"Armor": 0,
+		"MagicResist": 65,
+	}
+}
