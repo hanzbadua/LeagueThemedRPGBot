@@ -22,10 +22,13 @@ namespace LeagueThemedRPGBot
         public CommandsNextExtension Commands { get; set; }
 
         public async Task RunBotAsync() {
+
+            string token = await File.ReadAllTextAsync("token.txt");
+
             // create a bot client config incl. token
             var config = new DiscordConfiguration
             {
-                Token = "",
+                Token = token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
                 MinimumLogLevel = LogLevel.Debug,
@@ -71,6 +74,9 @@ namespace LeagueThemedRPGBot
             // register commands
             Commands.RegisterCommands<MainCommands>();
             Commands.RegisterCommands<DebugCommands>();
+            
+            // useless
+            Commands.RegisterCommands<UselessAmusementCommands>();
 
             // connect the client + log in
             await Client.ConnectAsync();
