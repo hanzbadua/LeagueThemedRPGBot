@@ -7,8 +7,9 @@ namespace LeagueThemedRPGBot.Commands
 {
     public class GameCommandModuleBase : BaseCommandModule
     {
-        protected PlayerData Players { get; } = new();
-        protected ItemData Items { get; } = new();
+        // append '= new();' if dependency injection doesn't work
+        public PlayerData Players { protected get; set; }
+        public ItemData Items { protected get; set; } 
 
         public override async Task AfterExecutionAsync(CommandContext ctx)
         {

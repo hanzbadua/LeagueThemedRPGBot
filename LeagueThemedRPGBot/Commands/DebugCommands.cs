@@ -6,23 +6,24 @@ using LeagueThemedRPGBot.Game;
 namespace LeagueThemedRPGBot.Commands
 {
     // Hidden debug commands
-    public partial class GameCommands : GameCommandModuleBase
+    [Group("debug"), Description("for debugging purposes, useable by owner only"), RequireOwner]
+    public class DebugCommands : GameCommandModuleBase
     {
-        [Command("exit"), Description("Safely exit the bot client and save data"), Hidden, RequireOwner]
+        [Command("exit"), Description("Safely exit the bot client and save data"), RequireOwner]
         public async Task Exit(CommandContext ctx)
         {
             await ctx.RespondAsync($"Exiting safely and saving data...");
             Environment.Exit(0);
         }
 
-        [Command("dumpdata"), Description("Safely exit the bot client and save data"), Hidden, RequireOwner]
+        [Command("dumpdata"), Description("Safely exit the bot client and save data"), RequireOwner]
         public async Task DumpData(CommandContext ctx)
         {
             var i = JsonSerializer.Serialize(Players.Data);
             await ctx.RespondAsync(i);
         }
 
-        [Command("givetestitem"), Description("give test item"), Hidden, RequireOwner]
+        [Command("givetestitem"), Description("give test item"), RequireOwner]
         public async Task GiveTestItem(CommandContext ctx)
         {
             if (!await PlayerIsInited(ctx)) return;
@@ -40,7 +41,7 @@ namespace LeagueThemedRPGBot.Commands
             await ctx.RespondAsync("Test item added");
         }
 
-        [Command("givelongsword"), Description("give long sword"), Hidden, RequireOwner]
+        [Command("givelongsword"), Description("give long sword"), RequireOwner]
         public async Task GiveLongSword(CommandContext ctx)
         {
             if (!await PlayerIsInited(ctx)) return;
@@ -62,7 +63,7 @@ namespace LeagueThemedRPGBot.Commands
             await ctx.RespondAsync("Long sword added");
         }
 
-        [Command("giveboots"), Description("give boots"), Hidden, RequireOwner]
+        [Command("giveboots"), Description("give boots"), RequireOwner]
         public async Task GiveBoots(CommandContext ctx)
         {
             if (!await PlayerIsInited(ctx)) return;
@@ -84,7 +85,7 @@ namespace LeagueThemedRPGBot.Commands
             await ctx.RespondAsync("Boots added");
         }
 
-        [Command("ItemStructureGen"), Description("Generate item structure and send msg as json"), Hidden, RequireOwner]
+        [Command("ItemStructureGen"), Description("Generate item structure and send msg as json"), RequireOwner]
         public async Task ItemStructureGen(CommandContext ctx)
         {
 

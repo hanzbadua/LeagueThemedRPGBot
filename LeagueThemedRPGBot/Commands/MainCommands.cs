@@ -7,7 +7,7 @@ using LeagueThemedRPGBot.Game;
 namespace LeagueThemedRPGBot.Commands
 {
     // main game commands
-    public partial class GameCommands : GameCommandModuleBase
+    public class MainCommands : GameCommandModuleBase
     {
         [Command("init"), Description("Initialize your character")]
         public async Task Init(CommandContext ctx)

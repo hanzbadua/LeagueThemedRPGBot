@@ -6,8 +6,10 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Interactivity.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using LeagueThemedRPGBot.Commands;
+using LeagueThemedRPGBot.Game;
 
 namespace LeagueThemedRPGBot
 {
@@ -42,12 +44,18 @@ namespace LeagueThemedRPGBot
             Client.Ready += OnReady;
             Client.GuildAvailable += OnGuildAvailable;
             Client.ClientErrored += OnClientError;
-            
+
+            var services = new ServiceCollection()
+                .AddSingleton<PlayerData>()
+                .AddSingleton<ItemData>()
+                .BuildServiceProvider();
+
             // create command configuration
             var commandConfig = new CommandsNextConfiguration {
                 StringPrefixes = new[] { "$" },
                 EnableDms = true,
-                EnableMentionPrefix = true
+                EnableMentionPrefix = true,
+                Services = services
             };
 
             // register command config to our bot client
@@ -58,7 +66,8 @@ namespace LeagueThemedRPGBot
             Commands.CommandErrored += OnCommandError;
 
             // register commands
-            Commands.RegisterCommands<GameCommands>();
+            Commands.RegisterCommands<MainCommands>();
+            Commands.RegisterCommands<DebugCommands>();
 
             // connect the client + log in
             await Client.ConnectAsync();
