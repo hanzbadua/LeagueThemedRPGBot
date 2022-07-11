@@ -11,9 +11,6 @@ namespace LeagueThemedRPGBot.Game
         public int Value { get; set; }
         public ItemStats Stats { get; set; } = null;
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
     }
 }

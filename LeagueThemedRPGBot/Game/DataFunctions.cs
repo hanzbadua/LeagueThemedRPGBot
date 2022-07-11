@@ -54,11 +54,7 @@ namespace LeagueThemedRPGBot.Game
             return retval;
         }
 
-        
-
         private static readonly Regex whitespace = new(@"\s+");
-
-        public static Random Rng { get; } = new();
 
         public static string RemoveWhitespace(this string s)
             => whitespace.Replace(s, string.Empty);

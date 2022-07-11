@@ -412,7 +412,7 @@ namespace LeagueThemedRPGBot.Commands
             if (await PlayerIsBusy(ctx)) return;
 
             Players.Data[ctx.User.Id].Busy = true;
-            await CombatRoutine(ctx, Enemy.GetScalingEnemy(Players.Data[ctx.User.Id].Level, EncounterTypes.Common));
+            await CombatRoutine(ctx, Enemy.GetScalingEnemy(Players.Data[ctx.User.Id].Level, EncounterTypes.Common, Rng));
             Players.Data[ctx.User.Id].Busy = false;
         }
 

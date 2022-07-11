@@ -10,11 +10,11 @@ namespace LeagueThemedRPGBot.Commands
         // append '= new();' if dependency injection doesn't work
         public PlayerData Players { protected get; set; }
         public ItemData Items { protected get; set; } 
+        public Random Rng { protected get; set; }
 
         public override async Task AfterExecutionAsync(CommandContext ctx)
         {
             await Players.SaveAsync();
-            await base.BeforeExecutionAsync(ctx);
         }
 
         // not a command
@@ -266,7 +266,7 @@ namespace LeagueThemedRPGBot.Commands
                 {
                     if (result.Result.Emoji == swordEmoji)
                     {
-                        var dmgl = DataFunctions.Rng.Next(pl.AttackDamage - (pl.AttackDamage * 25 / 100), pl.AttackDamage + (pl.AttackDamage * 25 / 100)) - enemyEffectiveAr;
+                        var dmgl = Rng.Next(pl.AttackDamage - (pl.AttackDamage * 25 / 100), pl.AttackDamage + (pl.AttackDamage * 25 / 100)) - enemyEffectiveAr;
                         e.Health -= dmgl;
                         if (e.Health <= 0)
                         {
@@ -298,7 +298,7 @@ namespace LeagueThemedRPGBot.Commands
                     .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
                 await resp.ModifyAsync(embed.Build());
 
-                var dmg = DataFunctions.Rng.Next(e.AttackDamage - (e.AttackDamage * 25 / 100), e.AttackDamage + (e.AttackDamage * 25 / 100)) - pl.Armor;
+                var dmg = Rng.Next(e.AttackDamage - (e.AttackDamage * 25 / 100), e.AttackDamage + (e.AttackDamage * 25 / 100)) - pl.Armor;
                 pl.Health -= dmg;
                 if (pl.Health <= 0)
                 {

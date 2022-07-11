@@ -15,6 +15,8 @@ namespace LeagueThemedRPGBot
 {
     public class BotClient
     {
+        private static async Task Main() => await new BotClient().RunBotAsync();
+
         public readonly EventId BotLoggingEvent = new (0, "BotLogging");
         public DiscordClient Client { get; set; }
         public CommandsNextExtension Commands { get; set; }
@@ -48,6 +50,7 @@ namespace LeagueThemedRPGBot
             var services = new ServiceCollection()
                 .AddSingleton<PlayerData>()
                 .AddSingleton<ItemData>()
+                .AddSingleton<Random>()
                 .BuildServiceProvider();
 
             // create command configuration
