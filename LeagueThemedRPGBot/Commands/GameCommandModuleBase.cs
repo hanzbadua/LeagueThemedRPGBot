@@ -10,11 +10,6 @@ namespace LeagueThemedRPGBot.Commands
         protected PlayerData Players { get; } = new();
         protected ItemData Items { get; } = new();
 
-        public GameCommandModuleBase() : base()
-        {
-            Players.Load();
-        }
-
         public override async Task AfterExecutionAsync(CommandContext ctx)
         {
             await Players.SaveAsync();

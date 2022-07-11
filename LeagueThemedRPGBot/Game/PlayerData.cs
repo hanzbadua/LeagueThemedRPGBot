@@ -10,14 +10,14 @@ namespace LeagueThemedRPGBot.Game
     {
         private const string PlayerDataLocation = "playerData.json";
 
+        public PlayerData()
+        {
+            Data = DataFunctions.LoadFileData<Dictionary<ulong, Player>>(PlayerDataLocation);
+        }
+
         public bool IsInitedByID(ulong Id)
         {
             return Data.ContainsKey(Id);
-        }
-
-        public void Load()
-        {
-            Data = DataFunctions.LoadFileData<Dictionary<ulong, Player>>(PlayerDataLocation);
         }
 
         public async Task SaveAsync()

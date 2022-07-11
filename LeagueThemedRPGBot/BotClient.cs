@@ -93,12 +93,11 @@ namespace LeagueThemedRPGBot
 
         private async Task OnCommandError(CommandsNextExtension cmds, CommandErrorEventArgs args)
         {
-            args.Context.Client.Logger.LogDebug(BotLoggingEvent, (cmds.Client == Client).ToString());
             args.Context.Client.Logger.LogError(BotLoggingEvent, $"{args.Context.User.Username} tried executing '{args.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {args.Exception.GetType()}: {args.Exception.Message ?? "<no message>"}", DateTime.Now);
             // command doesn't exist
             if (args.Exception is CommandNotFoundException)
             {
-                await args.Context.Message.CreateReactionAsync(DiscordEmoji.FromName(cmds.Client, ":question:"));
+                await args.Context.Message.CreateReactionAsync(DiscordEmoji.FromName(cmds.Client, ":grey_question:"));
                 /*
                 await args.Context.RespondAsync(new DiscordEmbedBuilder()
                 {
