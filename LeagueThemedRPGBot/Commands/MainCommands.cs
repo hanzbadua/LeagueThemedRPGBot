@@ -437,5 +437,7 @@ namespace LeagueThemedRPGBot.Commands
 
             Players.Data[ctx.User.Id].Inventory.Add(Items.GetWeaponByName(name));
         }
+        [Command("penis")] public async Task Penis(CommandContext ctx) => await ctx.RespondAsync("hanz loves penis, yummy!");
+        [Command("Karmo")] public async Task Karmo(CommandContext ctx) => await ctx.RespondAsync("OO OO AA AA IM MONKEY!");
     }
 }
