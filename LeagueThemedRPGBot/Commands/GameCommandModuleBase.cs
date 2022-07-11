@@ -229,20 +229,32 @@ namespace LeagueThemedRPGBot.Commands
 
         protected async Task CombatRoutine(CommandContext ctx, Enemy e)
         {
-            string desc = $"{e.Name} approaches you! What do you do?";
+            var pl = Player.Data[ctx.User.Id];
+            int enemyEffectiveAr = (e.Armor - (e.Armor * pl.ArmorPenPercent) - pl.ArmorPenFlat);
+
+            bool combat = true;
             var embed = new DiscordEmbedBuilder
             {
                 Title = $"Encounter: {e.Name}",
-                Description = desc
+                Description = $"{e.Name} approaches you! What do you do?"
             }
+            .AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
             .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
 
             var swordEmoji = DiscordEmoji.FromName(ctx.Client, ":crossed_swords:");
-            var attackButton = new DiscordButtonComponent(ButtonStyle.Primary, "encounter_attack", $"Attack {swordEmoji}");
-            var msg = new DiscordMessageBuilder().AddEmbed(embed.Build()).AddComponents(attackButton);
 
-
-            var resp = await ctx.RespondAsync(msg);
+            while (combat == true)
+            {
+                var resp = await ctx.RespondAsync(embed.Build());
+                var result = await resp.WaitForReactionAsync(ctx.Member);
+                if (!result.TimedOut)
+                {
+                    if (result.Result.Emoji == swordEmoji)
+                    {
+                        e.Health -= 1;
+                    }
+                }
+            }
         }
 
         protected readonly DiscordColor DefRed = new (255, 45, 0);
