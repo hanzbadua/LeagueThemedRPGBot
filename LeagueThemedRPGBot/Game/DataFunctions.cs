@@ -4,72 +4,57 @@ using System.Text.RegularExpressions;
 
 namespace LeagueThemedRPGBot.Game
 {
-    public static class Data
+    public static class DataFunctions
     {
-        public const string PlayerDataLocation = "playerData.json";
-        public const string WeaponDataDirectory = "weapons";
-
-        public static async Task SaveFileData<T>(string location, T data) {
+        public static async Task SaveFileDataAsync<T>(string location, T data) 
+        {
             using var saveData = File.Create(location);
             await JsonSerializer.SerializeAsync(saveData, data, opt);
             await saveData.DisposeAsync();
         }
 
-        public static async Task<T> LoadFileData<T>(string location) where T : new()
+        public static void SaveFileData<T>(string location, T data)
+        {
+            using var saveData = File.Create(location);
+            JsonSerializer.Serialize(saveData, data, opt);
+        }
+
+        public static T LoadFileData<T>(string location) where T : new()
         {
             // if data file doesn't exist we just assume the bot is starting fresh
             // as im not stupid
             if (!File.Exists(location)) {
                 var newData = new T();
-                await SaveFileData(location, newData);
+                SaveFileData(location, newData);
                 return newData;
             }
 
             using var fileData = File.OpenRead(location);
-            return await JsonSerializer.DeserializeAsync<T>(fileData, opt);
+            return JsonSerializer.Deserialize<T>(fileData, opt);
         }
 
-        public static async Task<Dictionary<string, T>> LoadGameDataFromDirectory<T>(string directoryLocation) where T : new()
+        public static Dictionary<string, T> LoadGameDataFromDirectory<T>(string directoryLocation) where T : new()
         {
-            if (!Directory.Exists(WeaponDataDirectory))
+            if (!Directory.Exists(directoryLocation))
             {
-                Directory.CreateDirectory(WeaponDataDirectory);
+                Directory.CreateDirectory(directoryLocation);
                 return new Dictionary<string, T>();
             }
 
-            var files = Directory.GetFiles(WeaponDataDirectory);
+            var files = Directory.GetFiles(directoryLocation);
             var retval = new Dictionary<string, T>();
 
             foreach (var file in files)
             {
                 using var data = File.OpenRead(file);
-                var ds = await JsonSerializer.DeserializeAsync<T>(data, opt);
+                var ds = JsonSerializer.Deserialize<T>(data, opt);
                 retval.Add(ds.ToString().RemoveWhitespace().ToLowerInvariant(), ds);
             }
 
             return retval;
         }
 
-        public static Item GetWeaponByName(string name)
-        {
-            name = name.RemoveWhitespace().ToLowerInvariant();
-            if (Item.Weapons.ContainsKey(name))
-                return Item.Weapons[name];
-
-            return FailsafeLongSword;
-        }
-
-        public static readonly Item FailsafeLongSword = new()
-        {
-            Name = "Long Sword",
-            Description = "It hurts.",
-            Rarity = ItemRarity.Basic,
-            Type = ItemType.Weapon,
-            Stats = new()
-            {
-                AttackDamage = 10
-            }
-        };
+        
 
         private static readonly Regex whitespace = new(@"\s+");
 

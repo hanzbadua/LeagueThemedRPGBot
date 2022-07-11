@@ -15,8 +15,5 @@ namespace LeagueThemedRPGBot.Game
         {
             return Name;
         }
-
-        // statics
-        public static Dictionary<string, Item> Weapons { get; set; }
     }
 }

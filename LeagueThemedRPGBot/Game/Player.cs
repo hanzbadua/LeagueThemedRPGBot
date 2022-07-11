@@ -48,9 +48,6 @@ namespace LeagueThemedRPGBot.Game
         [JsonInclude]
         public Item Boots { get; set; }
 
-        // statics
-        public static Dictionary<ulong, Player> Data { get; set; }
-
         public void AddStatsFromItem(Item i)
         {
             if (i.Stats is null) return;
@@ -96,11 +93,6 @@ namespace LeagueThemedRPGBot.Game
         public int CalculateXPForNextLevel()
         {
             return 100 + (Level * (Level * 14));
-        }
-
-        public static bool PlayerIsAlreadyInitialized(ulong playerID)
-        {
-            return Data.ContainsKey(playerID);
         }
     }
 }

@@ -5,13 +5,12 @@ using LeagueThemedRPGBot.Game;
 
 namespace LeagueThemedRPGBot.Commands
 {
-    [Group("Debug"), Description("Debug commands, not useable by normal users"), Hidden, RequireOwner]
-    public class DebugCommands : GameCommandModuleBase
+    // Hidden debug commands
+    public partial class GameCommands : GameCommandModuleBase
     {
         [Command("exit"), Description("Safely exit the bot client and save data"), Hidden, RequireOwner]
         public async Task Exit(CommandContext ctx)
         {
-            await Data.SaveFileData(Data.PlayerDataLocation, Player.Data);
             await ctx.RespondAsync($"Exiting safely and saving data...");
             Environment.Exit(0);
         }
@@ -19,7 +18,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("dumpdata"), Description("Safely exit the bot client and save data"), Hidden, RequireOwner]
         public async Task DumpData(CommandContext ctx)
         {
-            var i = JsonSerializer.Serialize(Player.Data);
+            var i = JsonSerializer.Serialize(Players.Data);
             await ctx.RespondAsync(i);
         }
 
@@ -36,7 +35,7 @@ namespace LeagueThemedRPGBot.Commands
                 Type = ItemType.Valuable
             };
 
-            Player.Data[ctx.User.Id].Inventory.Add(i);
+            Players.Data[ctx.User.Id].Inventory.Add(i);
 
             await ctx.RespondAsync("Test item added");
         }
@@ -58,7 +57,7 @@ namespace LeagueThemedRPGBot.Commands
                 }
             };
 
-            Player.Data[ctx.User.Id].Inventory.Add(i);
+            Players.Data[ctx.User.Id].Inventory.Add(i);
 
             await ctx.RespondAsync("Long sword added");
         }
@@ -80,7 +79,7 @@ namespace LeagueThemedRPGBot.Commands
                 }
             };
 
-            Player.Data[ctx.User.Id].Inventory.Add(i);
+            Players.Data[ctx.User.Id].Inventory.Add(i);
 
             await ctx.RespondAsync("Boots added");
         }

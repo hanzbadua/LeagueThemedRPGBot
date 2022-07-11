@@ -58,8 +58,7 @@ namespace LeagueThemedRPGBot
             Commands.CommandErrored += OnCommandError;
 
             // register commands
-            Commands.RegisterCommands<MainCommands>();
-            Commands.RegisterCommands<DebugCommands>();
+            Commands.RegisterCommands<GameCommands>();
 
             // connect the client + log in
             await Client.ConnectAsync();

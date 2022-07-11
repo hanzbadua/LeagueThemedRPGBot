@@ -6,21 +6,19 @@ using LeagueThemedRPGBot.Game;
 
 namespace LeagueThemedRPGBot.Commands
 {
-    // Ungrouped main game commands
-    public class MainCommands : GameCommandModuleBase
+    // main game commands
+    public partial class GameCommands : GameCommandModuleBase
     {
         [Command("init"), Description("Initialize your character")]
         public async Task Init(CommandContext ctx)
         {
-            if (Player.PlayerIsAlreadyInitialized(ctx.User.Id))
+            if (Players.IsInitedByID(ctx.User.Id))
             {
                 await ctx.RespondAsync("You have already initialized your character!");
                 return;
             }
 
-            Player.Data[ctx.User.Id] = new Player();
-            await Data.SaveFileData(Data.PlayerDataLocation, Player.Data);
-
+            Players.Data[ctx.User.Id] = new Player();
             await ctx.RespondAsync("Character initialized");
         }
 
@@ -30,7 +28,7 @@ namespace LeagueThemedRPGBot.Commands
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
-            await ctx.RespondAsync($"Current gold amount: {Player.Data[ctx.User.Id].Gold}");
+            await ctx.RespondAsync($"Current gold amount: {Players.Data[ctx.User.Id].Gold}");
         }
 
         [Command("stats"), Description("Check your current stats")]
@@ -39,7 +37,7 @@ namespace LeagueThemedRPGBot.Commands
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
-            var p = Player.Data[ctx.User.Id];
+            var p = Players.Data[ctx.User.Id];
 
             var msg = new DiscordEmbedBuilder
             {
@@ -48,10 +46,8 @@ namespace LeagueThemedRPGBot.Commands
             };
 
             msg.AddField("Level, XP", $"{p.Level}, {p.XP}/{p.CalculateXPForNextLevel()}");
-            msg.AddField("Max Health", $"{p.MaxHealth}");
-            msg.AddField("Max Mana", $"{p.MaxMana}");
-            //msg.AddField("Health", $"{p.Health}/{p.MaxHealth}");
-            //msg.AddField("Mana", $"{p.Mana}/{p.MaxMana}");
+            msg.AddField("Health", $"{p.Health}/{p.MaxHealth}");
+            msg.AddField("Mana", $"{p.Mana}/{p.MaxMana}");
             msg.AddField("Attack Damage", p.AttackDamage.ToString());
             msg.AddField("Ability Power", p.AbilityPower.ToString());
             msg.AddField("Crit Chance", $"{p.CritChance}%");
@@ -71,7 +67,7 @@ namespace LeagueThemedRPGBot.Commands
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
-            var p = Player.Data[ctx.User.Id];
+            var p = Players.Data[ctx.User.Id];
             const string na = "N/A";
 
             var msg = new DiscordEmbedBuilder
@@ -105,7 +101,7 @@ namespace LeagueThemedRPGBot.Commands
             string contents = "";
             int index = 1;
 
-            foreach (var i in Player.Data[ctx.User.Id].Inventory)
+            foreach (var i in Players.Data[ctx.User.Id].Inventory)
             {
                 contents += $"{index}. {i.Name} ({Enum.GetName(i.Rarity)}, {Enum.GetName(i.Type)}){Environment.NewLine}";
                 index++;
@@ -124,7 +120,7 @@ namespace LeagueThemedRPGBot.Commands
             int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
             if (!await ItemIndexIsValid(ctx, index)) return;
 
-            var item = Player.Data[ctx.User.Id].Inventory[index];
+            var item = Players.Data[ctx.User.Id].Inventory[index];
             var msg = new DiscordEmbedBuilder { Title = "Viewing item", Color = DefBlue };
             msg.AddField("Name", item.Name)
                 .AddField("Description", item.Description)
@@ -188,7 +184,7 @@ namespace LeagueThemedRPGBot.Commands
             int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
             if (!await ItemIndexIsValid(ctx, index)) return;
 
-            var player = Player.Data[ctx.User.Id];
+            var player = Players.Data[ctx.User.Id];
             var item = player.Inventory[index];
 
             if (item.Type != ItemType.Armor && item.Type != ItemType.Weapon && item.Type != ItemType.Boots) {
@@ -203,13 +199,13 @@ namespace LeagueThemedRPGBot.Commands
                 if (player.Boots is null)
                 {
                     await ctx.RespondAsync($"Equipping boots '{item.Name}'...");
-                    Player.Data[ctx.User.Id].Boots = item;
-                    Player.Data[ctx.User.Id].AddStatsFromItem(item);
-                    Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
+                    Players.Data[ctx.User.Id].Boots = item;
+                    Players.Data[ctx.User.Id].AddStatsFromItem(item);
+                    Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
                 }
                 else
                 {
-                    Player.Data[ctx.User.Id].Busy = true;
+                    Players.Data[ctx.User.Id].Busy = true;
                     await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.Boots, index);
                 }
             }
@@ -218,7 +214,7 @@ namespace LeagueThemedRPGBot.Commands
                 await ctx.RespondAsync($"Equipping weapon '{item.Name}'...");
                 await ctx.RespondAsync($"Respond with *main* or *offhand* to choose what slot to equip {item.Name} in");
 
-                Player.Data[ctx.User.Id].Busy = true;
+                Players.Data[ctx.User.Id].Busy = true;
 
                 var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "main" || i.Content.ToLowerInvariant() == "offhand");
                 if (!rr.TimedOut)
@@ -228,9 +224,9 @@ namespace LeagueThemedRPGBot.Commands
                         if (player.MainWeapon is null)
                         {
                             await ctx.RespondAsync($"Equipping {item.Name} as main weapon...");
-                            Player.Data[ctx.User.Id].MainWeapon = item;
-                            Player.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
+                            Players.Data[ctx.User.Id].MainWeapon = item;
+                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
+                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         }
                         else
                         {
@@ -242,9 +238,9 @@ namespace LeagueThemedRPGBot.Commands
                         if (player.OffhandWeapon is null)
                         {
                             await ctx.RespondAsync($"Equipping {item.Name} as offhand weapon...");
-                            Player.Data[ctx.User.Id].OffhandWeapon = item;
-                            Player.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
+                            Players.Data[ctx.User.Id].OffhandWeapon = item;
+                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
+                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         }
                         else
                         {
@@ -259,7 +255,7 @@ namespace LeagueThemedRPGBot.Commands
                 await ctx.RespondAsync($"Equipping armor '{item.Name}'...");
                 await ctx.RespondAsync($"Respond with *one*, *two*, or *three* to choose what slot to equip {item.Name} in");
 
-                Player.Data[ctx.User.Id].Busy = true;
+                Players.Data[ctx.User.Id].Busy = true;
 
                 var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "one" || i.Content.ToLowerInvariant() == "two" || i.Content.ToLowerInvariant() == "three");
                 if (!rr.TimedOut)
@@ -269,9 +265,9 @@ namespace LeagueThemedRPGBot.Commands
                         if (player.ArmorOne is null)
                         {
                             await ctx.RespondAsync($"Equipping {item.Name} in armor slot one...");
-                            Player.Data[ctx.User.Id].ArmorOne = item;
-                            Player.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
+                            Players.Data[ctx.User.Id].ArmorOne = item;
+                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
+                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         }
                         else
                         {
@@ -283,9 +279,9 @@ namespace LeagueThemedRPGBot.Commands
                         if (player.ArmorTwo is null)
                         {
                             await ctx.RespondAsync($"Equipping {item.Name} in armor slot two...");
-                            Player.Data[ctx.User.Id].ArmorTwo = item;
-                            Player.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
+                            Players.Data[ctx.User.Id].ArmorTwo = item;
+                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
+                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         }
                         else
                         {
@@ -297,9 +293,9 @@ namespace LeagueThemedRPGBot.Commands
                         if (player.ArmorThree is null)
                         {
                             await ctx.RespondAsync($"Equipping {item.Name} in armor slot three...");
-                            Player.Data[ctx.User.Id].ArmorThree = item;
-                            Player.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Player.Data[ctx.User.Id].Inventory.RemoveAt(index);
+                            Players.Data[ctx.User.Id].ArmorThree = item;
+                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
+                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
                         }
                         else
                         {
@@ -310,7 +306,7 @@ namespace LeagueThemedRPGBot.Commands
                     await ctx.RespondAsync("Timed out - no changes were made");
             }
 
-            Player.Data[ctx.User.Id].Busy = false;
+            Players.Data[ctx.User.Id].Busy = false;
         }
 
         [Command("Unequip")]
@@ -335,7 +331,7 @@ namespace LeagueThemedRPGBot.Commands
             if (await PlayerIsBusy(ctx)) return;
 
             slot = slot.RemoveWhitespace().ToLowerInvariant();
-            var p = Player.Data[ctx.User.Id];
+            var p = Players.Data[ctx.User.Id];
 
             if (slot == "armorone")
             {
@@ -412,16 +408,24 @@ namespace LeagueThemedRPGBot.Commands
         [Command("encounter"), Description("Maybe you'll find something worthwhile to fight")]
         public async Task Encounter(CommandContext ctx)
         {
-            Player.Data[ctx.User.Id].Health = Player.Data[ctx.User.Id].MaxHealth;
-
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
-            Player.Data[ctx.User.Id].Busy = true;
-            await CombatRoutine(ctx, Enemy.GetScalingEnemy(Player.Data[ctx.User.Id].Level, EncounterTypes.Common));
-            Player.Data[ctx.User.Id].Busy = false;
+            Players.Data[ctx.User.Id].Busy = true;
+            await CombatRoutine(ctx, Enemy.GetScalingEnemy(Players.Data[ctx.User.Id].Level, EncounterTypes.Common));
+            Players.Data[ctx.User.Id].Busy = false;
+        }
 
-            Player.Data[ctx.User.Id].Health = Player.Data[ctx.User.Id].MaxHealth;
+        [Command("rest"), Description("Resting restores your health and mana back to full")]
+        public async Task Rest(CommandContext ctx)
+        {
+            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsBusy(ctx)) return;
+
+            Players.Data[ctx.User.Id].Health = Players.Data[ctx.User.Id].MaxHealth;
+            Players.Data[ctx.User.Id].Mana = Players.Data[ctx.User.Id].MaxMana;
+
+            await ctx.RespondAsync("Resting makes you feel good again. Health and mana restored.");
         }
 
         // NOTE: remove later because it is a test command
@@ -431,7 +435,7 @@ namespace LeagueThemedRPGBot.Commands
             if (!await PlayerIsInited(ctx)) 
                 return;
 
-            Player.Data[ctx.User.Id].Inventory.Add(Data.GetWeaponByName(name));
+            Players.Data[ctx.User.Id].Inventory.Add(Items.GetWeaponByName(name));
         }
     }
 }
