@@ -3,6 +3,6 @@
     public enum EncounterTypes : int
     {
         Common = 0,
-        CommonBig = 1
+        Uncommon = 1
     }
 }

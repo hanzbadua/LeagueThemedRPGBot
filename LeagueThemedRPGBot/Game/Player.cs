@@ -93,9 +93,9 @@ namespace LeagueThemedRPGBot.Game
             MagicResist -= s.MagicResist;
         }
 
-        public static float CalculateXPForNextLevel(int currentLevel)
+        public int CalculateXPForNextLevel()
         {
-            return 100 + (currentLevel * (currentLevel * 12.5f));
+            return 100 + (Level * (Level * 14));
         }
 
         public static bool PlayerIsAlreadyInitialized(ulong playerID)

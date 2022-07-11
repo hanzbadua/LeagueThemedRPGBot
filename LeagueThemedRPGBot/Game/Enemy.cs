@@ -23,26 +23,26 @@
 
         public static Enemy GetScalingEnemy(int playerLevel, EncounterTypes type)
         {
-            float typeMult = 0.5f;
-            float levelMult = 0.55f + (playerLevel * 0.12f);
+            float typeMult = 0.8f;
+            float levelMult = playerLevel / 1.2f;
 
             (string, EncounterDamageType) enc = ("Caster Minion", EncounterDamageType.Physical); // fallback assignment
             var dtype = enc.Item2;
 
             if (type == EncounterTypes.Common)
             {
-                typeMult = 0.75f;
+                typeMult = 1.0f;
                 enc = CommonEncounters[Data.Rng.Next(CommonEncounters.Count)];
             }
-            else if (type == EncounterTypes.CommonBig)
+            else if (type == EncounterTypes.Uncommon)
             {
-                typeMult = 1.0f;
+                typeMult = 1.22f;
                 enc = CommonBigEncounters[Data.Rng.Next(CommonBigEncounters.Count)];
             }
 
             float overallMult = levelMult * typeMult;
 
-            int hp = Data.Rng.Next((int)(100 * overallMult)/2, (int)(100 * overallMult));
+            int hp = Data.Rng.Next((int)(100 * overallMult / 2), (int)(100 * overallMult * 2));
 
             var retval = new Enemy
             {

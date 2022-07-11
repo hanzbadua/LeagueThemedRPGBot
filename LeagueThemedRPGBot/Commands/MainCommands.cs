@@ -47,9 +47,11 @@ namespace LeagueThemedRPGBot.Commands
                 Color = DefBlue
             };
 
-            msg.AddField("Level, XP", $"{p.Level}, {p.XP}/{Player.CalculateXPForNextLevel(p.Level)}");
-            msg.AddField("Health", $"{p.Health}/{p.MaxHealth}");
-            msg.AddField("Mana", $"{p.Mana}/{p.MaxMana}");
+            msg.AddField("Level, XP", $"{p.Level}, {p.XP}/{p.CalculateXPForNextLevel()}");
+            msg.AddField("Max Health", $"{p.MaxHealth}");
+            msg.AddField("Max Mana", $"{p.MaxMana}");
+            //msg.AddField("Health", $"{p.Health}/{p.MaxHealth}");
+            //msg.AddField("Mana", $"{p.Mana}/{p.MaxMana}");
             msg.AddField("Attack Damage", p.AttackDamage.ToString());
             msg.AddField("Ability Power", p.AbilityPower.ToString());
             msg.AddField("Crit Chance", $"{p.CritChance}%");
@@ -403,19 +405,23 @@ namespace LeagueThemedRPGBot.Commands
             }
             else
             {
-                await ctx.RespondAsync("Timed out - no changes were made");
+                await ctx.RespondAsync($"{slot} is not a valid unequip slot;{Environment.NewLine}Valid unequip slots: `armorone`, `armortwo`, `armorthree`, `boots`, `mainweapon`, `offhandweapon`"); 
             }
         }
 
         [Command("encounter"), Description("Maybe you'll find something worthwhile to fight")]
         public async Task Encounter(CommandContext ctx)
         {
+            Player.Data[ctx.User.Id].Health = Player.Data[ctx.User.Id].MaxHealth;
+
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             Player.Data[ctx.User.Id].Busy = true;
             await CombatRoutine(ctx, Enemy.GetScalingEnemy(Player.Data[ctx.User.Id].Level, EncounterTypes.Common));
             Player.Data[ctx.User.Id].Busy = false;
+
+            Player.Data[ctx.User.Id].Health = Player.Data[ctx.User.Id].MaxHealth;
         }
 
         // NOTE: remove later because it is a test command

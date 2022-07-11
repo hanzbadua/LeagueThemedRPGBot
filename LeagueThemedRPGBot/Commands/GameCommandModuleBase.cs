@@ -230,33 +230,82 @@ namespace LeagueThemedRPGBot.Commands
         protected async Task CombatRoutine(CommandContext ctx, Enemy e)
         {
             var pl = Player.Data[ctx.User.Id];
-            int enemyEffectiveAr = (e.Armor - (e.Armor * pl.ArmorPenPercent) - pl.ArmorPenFlat);
+            int enemyEffectiveAr = e.Armor - (e.Armor * pl.ArmorPenPercent / 100) - pl.ArmorPenFlat;
+            int enemyEffectiveMr = e.MagicResist - (e.Armor * pl.MagicPenPercent / 100) - pl.MagicPenFlat;
 
             bool combat = true;
             var embed = new DiscordEmbedBuilder
             {
                 Title = $"Encounter: {e.Name}",
-                Description = $"{e.Name} approaches you! What do you do?"
-            }
-            .AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
-            .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                Description = $"{e.Name} approaches you! What do you do?",
+                Color = DefBlue
+            };
+
+            var resp = await ctx.RespondAsync(embed.Build());
 
             var swordEmoji = DiscordEmoji.FromName(ctx.Client, ":crossed_swords:");
-
+            await resp.CreateReactionAsync(swordEmoji);
             while (combat == true)
             {
-                var resp = await ctx.RespondAsync(embed.Build());
+                embed.ClearFields();
+                // Player's turn
+                embed.AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
+                    .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                resp = await resp.ModifyAsync(embed.Build());
+
                 var result = await resp.WaitForReactionAsync(ctx.Member);
                 if (!result.TimedOut)
                 {
                     if (result.Result.Emoji == swordEmoji)
                     {
-                        e.Health -= 1;
+                        var dmgl = Data.Rng.Next(pl.AttackDamage - (pl.AttackDamage * 25 / 100), pl.AttackDamage + (pl.AttackDamage * 25 / 100)) - enemyEffectiveAr;
+                        e.Health -= dmgl;
+                        if (e.Health <= 0)
+                        {
+                            embed.Description = $"You won fighting against {e.Name}! Implement rewards here...";
+                            embed.Color = DefGreen;
+                            embed.ClearFields();
+                            embed.AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
+                                .AddField("Enemy Health | Damage | Resists", $"{0}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                            resp = await resp.ModifyAsync(embed.Build());
+                            return;
+                            //break;
+                        }
+                        embed.Description = $"You deal {dmgl} to {e.Name}; ";
+                        await resp.DeleteReactionAsync(swordEmoji, ctx.User);
                     }
                 }
+                else {
+                    await resp.ModifyAsync(new DiscordEmbedBuilder { 
+                        Title = "Encounter timed out. You took too long to make a decision - no rewards given",
+                        Color = DefRed
+                    }.Build());
+                    return;
+                }
+
+                // Enemy's turn
+                embed.ClearFields();
+                embed.AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
+                    .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                resp = await resp.ModifyAsync(embed.Build());
+
+                var dmg = Data.Rng.Next(e.AttackDamage - (e.AttackDamage * 25 / 100), e.AttackDamage + (e.AttackDamage * 25 / 100)) - pl.Armor;
+                pl.Health -= dmg;
+                if (pl.Health <= 0)
+                {
+                    embed.Description = $"You lost against {e.Name}... you got no rewards.";
+                    embed.Color = DefRed;
+                    embed.ClearFields();
+                    embed.AddField("Your Health | Damage | Resists", $"{0}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
+                        .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                    resp = await resp.ModifyAsync(embed.Build());
+                    return;
+                }
+                embed.Description += $" {e.Name} did {dmg} to you";
             }
         }
 
+        protected readonly DiscordColor DefGreen = new (55, 255, 119);
         protected readonly DiscordColor DefRed = new (255, 45, 0);
         protected readonly DiscordColor DefBlue = new (0, 191, 255);
     }
