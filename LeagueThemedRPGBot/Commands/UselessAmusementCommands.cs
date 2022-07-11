@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext.Attributes;
 
 namespace LeagueThemedRPGBot.Commands
 {
+    [Hidden]
     public class UselessAmusementCommands : BaseCommandModule
     {
         [Command("penis"), Hidden] public async Task Penis(CommandContext ctx) => await ctx.RespondAsync("hanz loves penis, yummy!");
