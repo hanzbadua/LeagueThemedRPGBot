@@ -4,6 +4,8 @@ namespace LeagueThemedRPGBot.Game
 {
     [JsonSerializable(typeof(Item))]
     [JsonSerializable(typeof(List<Item>))]
+    [JsonSerializable(typeof(Skill))]
+    [JsonSerializable(typeof(List<Skill>))]
     public class Player
     {
         // instanced data
@@ -11,8 +13,8 @@ namespace LeagueThemedRPGBot.Game
         public int XP { get; set; } = 0;
         public int MaxHealth { get; set; } = 100;
         public int Health { get; set; } = 100;
-        public int MaxMana { get; set; } = 50;
-        public int Mana { get; set; } = 50;
+        public int MaxMana { get; set; } = 15;
+        public int Mana { get; set; } = 15;
         public int AttackDamage { get; set; } = 10;
         public int AbilityPower { get; set; } = 0;
         public int CritChance { get; set; } = 0;
@@ -22,9 +24,9 @@ namespace LeagueThemedRPGBot.Game
         public int MagicPenPercent { get; set; } = 0;
         public int MagicPenFlat { get; set; } = 0;
         public int Omnivamp { get; set; } = 0;
-        public int Armor { get; set; } = 0;
-        public int MagicResist { get; set; } = 0;
-        public int Gold /*MorbBucks*/ { get; set; } = 100;
+        public int Armor { get; set; } = 5;
+        public int MagicResist { get; set; } = 5;
+        public int Gold { get; set; } = 0;
         public bool Busy { get; set; } = false;
 
         [JsonInclude]
@@ -48,6 +50,17 @@ namespace LeagueThemedRPGBot.Game
         [JsonInclude]
         public Item Boots { get; set; }
 
+        [JsonInclude]
+        public List<Skill> KnownSkills { get; set; } = new();
+
+        [JsonInclude]
+        public Skill Skill1 { get; set; }
+
+        [JsonInclude]
+        public Skill Skill2 { get; set; }
+
+        [JsonInclude]
+        public Skill Skill3 { get; set; }
         public void AddStatsFromItem(Item i)
         {
             if (i.Stats is null) return;

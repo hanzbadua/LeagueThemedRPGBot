@@ -7,22 +7,61 @@ using LeagueThemedRPGBot.Game;
 namespace LeagueThemedRPGBot.Commands
 {
     // main game commands
-    public class MainCommands : GameCommandModuleBase
+    public partial class MainCommands : GameCommandModuleBase
     {
         [Command("init"), Description("Initialize your character")]
         public async Task Init(CommandContext ctx)
         {
+            var msg = new DiscordEmbedBuilder().WithTitle("Character initialization");
+
             if (Players.IsInitedByID(ctx.User.Id))
             {
-                await ctx.RespondAsync("You have already initialized your character!");
+                await ctx.RespondAsync(msg
+                    .WithColor(DefRed)
+                    .WithDescription("You have already initialized your character")
+                    .Build());
                 return;
             }
 
-            Players.Data[ctx.User.Id] = new Player();
-            await ctx.RespondAsync("Character initialized");
+            var assassinEmoji = DiscordEmoji.FromName(ctx.Client, ":dagger:");
+            var bruiserEmoji = DiscordEmoji.FromName(ctx.Client, ":crossed_swords:");
+            var marksmanEmoji = DiscordEmoji.FromName(ctx.Client, ":bow_and_arrow:");
+            var mageEmoji = DiscordEmoji.FromName(ctx.Client, ":crystal_ball:");
+            var battleMageEmoji = DiscordEmoji.FromName(ctx.Client, ":hourglass:");
+
+            var req = await ctx.RespondAsync(msg
+                .WithColor(DefBlue)
+                .WithDescription("Initializing character... choose your starting class")
+                .AddField("Classes", $"Assassin {assassinEmoji}, Bruiser/Skirmisher {bruiserEmoji}, Marksman {marksmanEmoji}, Burst Mage {mageEmoji}, Battlemage {battleMageEmoji}")
+                .Build());
+            await req.CreateReactionAsync(assassinEmoji);
+            await req.CreateReactionAsync(bruiserEmoji);
+            await req.CreateReactionAsync(marksmanEmoji);
+            await req.CreateReactionAsync(mageEmoji);
+            await req.CreateReactionAsync(battleMageEmoji);
+
+            var res = await req.WaitForReactionAsync(ctx.Member);
+
+            if (!res.TimedOut)
+            {
+                if (res.Result.Emoji == assassinEmoji)
+                {
+                    Players.Data[ctx.User.Id] = new Player();
+                }
+            }
+            else
+            {
+                await req.DeleteAllReactionsAsync();
+                await req.ModifyAsync(msg
+                    .WithColor(DefRed)
+                    .WithDescription("Timed out - no changes were made")
+                    .ClearFields()
+                    .Build());
+                return;
+            }
         }
 
-        [Command("balance"), Aliases("bal"), Description("Check your current currency balance")]
+        [Command("balance"), Aliases("bal"), Description("Check your current gold balance")]
         public async Task Balance(CommandContext ctx)
         {
             if (!await PlayerIsInited(ctx)) return;
@@ -165,244 +204,6 @@ namespace LeagueThemedRPGBot.Commands
             }
 
             await ctx.RespondAsync(msg.Build());
-        }
-
-        [Command("equip")]
-        public async Task Equip(CommandContext ctx)
-        {
-            if (!await PlayerIsInited(ctx)) return;
-            if (await PlayerIsBusy(ctx)) return;
-            await ctx.RespondAsync("You need to specify an item in your inventory to equip");
-        }
-
-        [Command("equip"), Description("Equip an item via inventory index")]
-        public async Task Equip(CommandContext ctx, [Description("Inventory index of the item to equip")] int count)
-        {
-            if (!await PlayerIsInited(ctx)) return;
-            if (await PlayerIsBusy(ctx)) return;
-            if (await InventoryIsEmpty(ctx)) return;
-            int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
-            if (!await ItemIndexIsValid(ctx, index)) return;
-
-            var player = Players.Data[ctx.User.Id];
-            var item = player.Inventory[index];
-
-            if (item.Type != ItemType.Armor && item.Type != ItemType.Weapon && item.Type != ItemType.Boots) {
-                await ctx.RespondAsync("This isn't a valid equippable item! Make sure it is either a weapon, armor, or boots");
-                return;
-            }
-
-            if (item.Type == ItemType.Boots)
-            {
-                var current = player.Boots;
-
-                if (player.Boots is null)
-                {
-                    await ctx.RespondAsync($"Equipping boots '{item.Name}'...");
-                    Players.Data[ctx.User.Id].Boots = item;
-                    Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                    Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                }
-                else
-                {
-                    Players.Data[ctx.User.Id].Busy = true;
-                    await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.Boots, index);
-                }
-            }
-            else if (item.Type == ItemType.Weapon)
-            {
-                await ctx.RespondAsync($"Equipping weapon '{item.Name}'...");
-                await ctx.RespondAsync($"Respond with *main* or *offhand* to choose what slot to equip {item.Name} in");
-
-                Players.Data[ctx.User.Id].Busy = true;
-
-                var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "main" || i.Content.ToLowerInvariant() == "offhand");
-                if (!rr.TimedOut)
-                {
-                    if (rr.Result.Content.Contains("main", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (player.MainWeapon is null)
-                        {
-                            await ctx.RespondAsync($"Equipping {item.Name} as main weapon...");
-                            Players.Data[ctx.User.Id].MainWeapon = item;
-                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                        }
-                        else
-                        {
-                            await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.MainWeapon, index);
-                        }
-                    }
-                    else if (rr.Result.Content.Contains("offhand", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (player.OffhandWeapon is null)
-                        {
-                            await ctx.RespondAsync($"Equipping {item.Name} as offhand weapon...");
-                            Players.Data[ctx.User.Id].OffhandWeapon = item;
-                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                        }
-                        else
-                        {
-                            await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.OffhandWeapon, index);
-                        }
-                    }
-                } else
-                    await ctx.RespondAsync("Timed out - no changes were made");
-            }
-            else if (item.Type == ItemType.Armor)
-            {
-                await ctx.RespondAsync($"Equipping armor '{item.Name}'...");
-                await ctx.RespondAsync($"Respond with *one*, *two*, or *three* to choose what slot to equip {item.Name} in");
-
-                Players.Data[ctx.User.Id].Busy = true;
-
-                var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "one" || i.Content.ToLowerInvariant() == "two" || i.Content.ToLowerInvariant() == "three");
-                if (!rr.TimedOut)
-                {
-                    if (rr.Result.Content.Contains("one", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (player.ArmorOne is null)
-                        {
-                            await ctx.RespondAsync($"Equipping {item.Name} in armor slot one...");
-                            Players.Data[ctx.User.Id].ArmorOne = item;
-                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                        }
-                        else
-                        {
-                            await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.ArmorOne, index);
-                        }
-                    }
-                    else if (rr.Result.Content.Contains("two", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (player.ArmorTwo is null)
-                        {
-                            await ctx.RespondAsync($"Equipping {item.Name} in armor slot two...");
-                            Players.Data[ctx.User.Id].ArmorTwo = item;
-                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                        }
-                        else
-                        {
-                            await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.ArmorTwo, index);
-                        }
-                    }
-                    else if (rr.Result.Content.Contains("three", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (player.ArmorThree is null)
-                        {
-                            await ctx.RespondAsync($"Equipping {item.Name} in armor slot three...");
-                            Players.Data[ctx.User.Id].ArmorThree = item;
-                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                        }
-                        else
-                        {
-                            await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.ArmorThree, index);
-                        }
-                    }
-                } else
-                    await ctx.RespondAsync("Timed out - no changes were made");
-            }
-
-            Players.Data[ctx.User.Id].Busy = false;
-        }
-
-        [Command("Unequip")]
-        public async Task Unequip(CommandContext ctx)
-        {
-            if (!await PlayerIsInited(ctx)) return;
-            if (await PlayerIsBusy(ctx)) return;
-            var msg = new DiscordEmbedBuilder
-            {
-                Title = "No Unequip Slot Specified",
-                Color = DefRed,
-                Description = "Valid unequip slots: `armorone`, `armortwo`, `armorthree`, `boots`, `mainweapon`, `offhandweapon`"
-            };
-
-            await ctx.RespondAsync(msg.Build());
-        }
-
-        [Command("Unequip"), Description("Unequip an item in a slot via slot name")]
-        public async Task Unequip(CommandContext ctx, [RemainingText] [Description("Slot name to unequip")] string slot)
-        {
-            if (!await PlayerIsInited(ctx)) return;
-            if (await PlayerIsBusy(ctx)) return;
-
-            slot = slot.RemoveWhitespace().ToLowerInvariant();
-            var p = Players.Data[ctx.User.Id];
-
-            if (slot == "armorone")
-            {
-                if (p.ArmorOne is null)
-                {
-                    await ctx.RespondAsync("There's nothing in slot `armorone` to unequip!");
-                }
-                else 
-                {
-                    await UnequipLogic(ctx, ItemSlot.ArmorOne);
-                }
-            }
-            else if (slot == "armortwo")
-            {
-                if (p.ArmorTwo is null)
-                {
-                    await ctx.RespondAsync("There's nothing in slot `armortwo` to unequip!");
-                }
-                else
-                {
-                    await UnequipLogic(ctx, ItemSlot.ArmorTwo);
-                }
-            }
-            else if (slot == "armorthree")
-            {
-                if (p.ArmorThree is null)
-                {
-                    await ctx.RespondAsync("There's nothing in slot `armorthree` to unequip!");
-                }
-                else
-                {
-                    await UnequipLogic(ctx, ItemSlot.ArmorThree);
-                }
-            }
-            else if (slot == "mainweapon")
-            {
-                if (p.MainWeapon is null)
-                {
-                    await ctx.RespondAsync("There's nothing in slot `mainweapon` to unequip!");
-                }
-                else
-                {
-                    await UnequipLogic(ctx, ItemSlot.MainWeapon);
-                }
-            }
-            else if (slot == "offhandweapon")
-            {
-                if (p.OffhandWeapon is null)
-                {
-                    await ctx.RespondAsync("There's nothing in slot `offhandweapon` to unequip!");
-                }
-                else
-                {
-                    await UnequipLogic(ctx, ItemSlot.OffhandWeapon);
-                }
-            }
-            else if (slot == "boots")
-            {
-                if (p.Boots is null)
-                {
-                    await ctx.RespondAsync("There's nothing in slot `boots` to unequip!");
-                }
-                else
-                {
-                    await UnequipLogic(ctx, ItemSlot.Boots);
-                }
-            }
-            else
-            {
-                await ctx.RespondAsync($"{slot} is not a valid unequip slot;{Environment.NewLine}Valid unequip slots: `armorone`, `armortwo`, `armorthree`, `boots`, `mainweapon`, `offhandweapon`"); 
-            }
         }
 
         [Command("encounter"), Description("Maybe you'll find something worthwhile to fight")]

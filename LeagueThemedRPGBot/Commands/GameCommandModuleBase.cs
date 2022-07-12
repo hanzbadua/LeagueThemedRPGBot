@@ -5,9 +5,10 @@ using LeagueThemedRPGBot.Game;
 
 namespace LeagueThemedRPGBot.Commands
 {
-    public class GameCommandModuleBase : BaseCommandModule
+    public abstract class GameCommandModuleBase : BaseCommandModule
     {
-        // append '= new();' if dependency injection doesn't work
+        // We DON'T call assign new() to these properties as dependency injection with handle a concurrent singleton instance
+        // for all of our instantiated command modules inheriting GameCommandModuleBase
         public PlayerData Players { protected get; set; }
         public ItemData Items { protected get; set; } 
         public Random Rng { protected get; set; }

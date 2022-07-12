@@ -42,13 +42,28 @@ namespace LeagueThemedRPGBot.Game
             }
 
             var files = Directory.GetFiles(directoryLocation);
+            var subdirs = Directory.GetDirectories(directoryLocation);
             var retval = new Dictionary<string, T>();
 
             foreach (var file in files)
             {
                 using var data = File.OpenRead(file);
                 var ds = JsonSerializer.Deserialize<T>(data, opt);
-                retval.Add(ds.ToString().RemoveWhitespace().ToLowerInvariant(), ds);
+                var key = ds.ToString().RemoveWhitespace().ToLowerInvariant();
+                if (retval.ContainsKey(key)) key += "q";
+                retval.Add(key, ds);
+            }
+
+            foreach (var dir in subdirs)
+            {
+                foreach (var file in Directory.GetFiles(dir))
+                {
+                    using var data = File.OpenRead(file);
+                    var ds = JsonSerializer.Deserialize<T>(data, opt);
+                    var key = ds.ToString().RemoveWhitespace().ToLowerInvariant();
+                    if (retval.ContainsKey(key)) key += "q";
+                    retval.Add(key, ds);
+                }
             }
 
             return retval;

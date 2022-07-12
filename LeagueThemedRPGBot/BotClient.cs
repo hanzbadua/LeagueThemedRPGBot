@@ -13,6 +13,7 @@ using LeagueThemedRPGBot.Game;
 
 namespace LeagueThemedRPGBot
 {
+    // Todo: implement skill inventory, new weapons + armor, new init (starting classes + items)
     public class BotClient
     {
         private static async Task Main() => await new BotClient().RunBotAsync();
@@ -50,6 +51,7 @@ namespace LeagueThemedRPGBot
             Client.GuildAvailable += OnGuildAvailable;
             Client.ClientErrored += OnClientError;
 
+            // dependency injection
             var services = new ServiceCollection()
                 .AddSingleton<PlayerData>()
                 .AddSingleton<ItemData>()

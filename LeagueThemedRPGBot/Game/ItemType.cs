@@ -2,11 +2,10 @@
 {
     public enum ItemType : int
     {
-        Junk = -1,
-        Normal = 0,
+        Useable = 0,
         Valuable = 1,
-        Weapon = 2,
-        Armor = 3,
-        Boots = 4
+        Weapon = 2, // equippable
+        Armor = 3, // equippable
+        Boots = 4 // equippable
     }
 }
