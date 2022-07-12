@@ -78,6 +78,9 @@ namespace LeagueThemedRPGBot
             // useless
             Commands.RegisterCommands<UselessAmusementCommands>();
 
+            // use custom help formatter
+            Commands.SetHelpFormatter<CustomHelpFormatter>();
+
             // connect the client + log in
             await Client.ConnectAsync();
 

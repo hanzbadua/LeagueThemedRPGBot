@@ -112,7 +112,7 @@ namespace LeagueThemedRPGBot.Commands
         }
 
         [Command("inventory"), Description("View an item in your inventory via index")]
-        public async Task Inventory(CommandContext ctx, int count)
+        public async Task Inventory(CommandContext ctx, [Description("Inventory index of the type to equip")] int count)
         {
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
@@ -176,7 +176,7 @@ namespace LeagueThemedRPGBot.Commands
         }
 
         [Command("equip"), Description("Equip an item via inventory index")]
-        public async Task Equip(CommandContext ctx, [Description("Index of the item to equip")] int count)
+        public async Task Equip(CommandContext ctx, [Description("Inventory index of the item to equip")] int count)
         {
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
