@@ -11,8 +11,8 @@ namespace LeagueThemedRPGBot.Game
         // instanced data
         public int Level { get; set; } = 1;
         public int XP { get; set; } = 0;
-        public int MaxHealth { get; set; } = 100;
-        public int Health { get; set; } = 100;
+        public int MaxHealth { get; set; } = 50;
+        public int Health { get; set; } = 50;
         public int MaxMana { get; set; } = 15;
         public int Mana { get; set; } = 15;
         public int AttackDamage { get; set; } = 10;

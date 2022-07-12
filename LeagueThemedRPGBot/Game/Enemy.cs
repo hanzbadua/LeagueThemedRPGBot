@@ -44,7 +44,7 @@
 
             float overallMult = levelMult * typeMult;
 
-            int hp = rng.Next((int)(100 * overallMult / 2), (int)(100 * overallMult * 2));
+            int hp = rng.Next((int)(55 * overallMult / 2), (int)(65 * overallMult * 2));
 
             var retval = new Enemy
             {
@@ -54,13 +54,13 @@
             };
 
             if (dtype == EncounterDamageType.Physical || dtype == EncounterDamageType.Mixed)
-                retval.AttackDamage = rng.Next((int)(10 + (20 * overallMult)), (int)(10 + (20 * overallMult * 2)));
+                retval.AttackDamage = rng.Next((int)(5 + (20 * overallMult)), (int)(6 + (20 * overallMult * 2)));
 
             if (dtype == EncounterDamageType.Mixed)
                 retval.AbilityPower = rng.Next((int)(5 + (10 * overallMult)), (int)(10 + (20 * overallMult)));
 
             if (dtype == EncounterDamageType.Magic)
-                retval.AbilityPower = rng.Next((int)(10 + (15 * overallMult)), (int)(15 + (30 * overallMult)));
+                retval.AbilityPower = rng.Next((int)(9 + (15 * overallMult)), (int)(14 + (30 * overallMult)));
 
             retval.Armor = rng.Next(3 + (int)(10 * overallMult));
             retval.MagicResist = rng.Next(3 + (int)(10 * overallMult));

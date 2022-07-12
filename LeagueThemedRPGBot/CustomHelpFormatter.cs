@@ -39,7 +39,8 @@ namespace LeagueThemedRPGBot
                     }
                 }
 
-                Message.AddField("Arguments", args);
+                if (!string.IsNullOrEmpty(args))
+                    Message.AddField("Arguments", args);
             }
 
             if (cmd.Aliases.Any())
@@ -50,7 +51,9 @@ namespace LeagueThemedRPGBot
                 {
                     aliasesList += $"`{i}` ";
                 }
-                Message.AddField("Aliases", aliasesList);
+
+                if (!string.IsNullOrEmpty(aliasesList))
+                    Message.AddField("Aliases", aliasesList);
             }
 
             return this;

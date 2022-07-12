@@ -32,7 +32,7 @@ namespace LeagueThemedRPGBot.Commands
             var req = await ctx.RespondAsync(msg
                 .WithColor(DefBlue)
                 .WithDescription("Initializing character... choose your starting class")
-                .AddField("Classes", $"Assassin {assassinEmoji}, Bruiser/Skirmisher {bruiserEmoji}, Marksman {marksmanEmoji}, Burst Mage {mageEmoji}, Battlemage {battleMageEmoji}")
+                .AddField("Classes", $"Assassin {assassinEmoji}, Bruiser {bruiserEmoji}, Marksman {marksmanEmoji}, Burst Mage {mageEmoji}, Battlemage {battleMageEmoji}")
                 .Build());
             await req.CreateReactionAsync(assassinEmoji);
             await req.CreateReactionAsync(bruiserEmoji);
@@ -41,19 +41,90 @@ namespace LeagueThemedRPGBot.Commands
             await req.CreateReactionAsync(battleMageEmoji);
 
             var res = await req.WaitForReactionAsync(ctx.Member);
-
+            var startingItem = new Item();
             if (!res.TimedOut)
             {
                 if (res.Result.Emoji == assassinEmoji)
                 {
-                    Players.Data[ctx.User.Id] = new Player();
+                    startingItem = Items.GetWeaponByName("(Barely) Serrated Dirk");
+                    Players.Data[ctx.User.Id] = new()
+                    {
+                        MainWeapon = startingItem
+                    };
+                    Players.Data[ctx.User.Id].AddStatsFromItem(startingItem);
+                    await req.DeleteAllReactionsAsync();
+                    await req.ModifyAsync(
+                        msg.WithDescription("You have decided to begin your journey as an... \"Assassin\"... if you can even call yourself that")
+                        .ClearFields()
+                        .WithColor(DefGreen)
+                        .Build());
+                }
+                else if (res.Result.Emoji == bruiserEmoji)
+                {
+                    startingItem = Items.GetWeaponByName("Doran's Blade");
+                    Players.Data[ctx.User.Id] = new()
+                    {
+                        MainWeapon = startingItem
+                    };
+                    Players.Data[ctx.User.Id].AddStatsFromItem(startingItem);
+                    await req.DeleteAllReactionsAsync();
+                    await req.ModifyAsync(
+                        msg.WithDescription("You have decided to begin your journey as a Bruiser, able to take extended fights and close skirmishes.")
+                        .ClearFields()
+                        .WithColor(DefGreen)
+                        .Build());
+                }
+                else if (res.Result.Emoji == marksmanEmoji)
+                {
+                    startingItem = Items.GetWeaponByName("Toy Noonquiver");
+                    Players.Data[ctx.User.Id] = new()
+                    {
+                        MainWeapon = startingItem
+                    };
+                    Players.Data[ctx.User.Id].AddStatsFromItem(startingItem);
+                    await req.DeleteAllReactionsAsync();
+                    await req.ModifyAsync(
+                        msg.WithDescription("You have decided to begin your journey as a Marksman; precise and delicate methods of... execution...")
+                        .ClearFields()
+                        .WithColor(DefGreen)
+                        .Build());
+                }
+                else if (res.Result.Emoji == mageEmoji)
+                {
+                    startingItem = Items.GetWeaponByName("Doran's Ring");
+                    Players.Data[ctx.User.Id] = new()
+                    {
+                        MainWeapon = startingItem
+                    };
+                    Players.Data[ctx.User.Id].AddStatsFromItem(startingItem);
+                    await req.DeleteAllReactionsAsync();
+                    await req.ModifyAsync(
+                        msg.WithDescription("You have decided to begin your journey as a Mage; little regard for your surroundings, you prefer to just blow things up with magic.")
+                        .ClearFields()
+                        .WithColor(DefGreen)
+                        .Build());
+                }
+                else if (res.Result.Emoji == battleMageEmoji)
+                {
+                    startingItem = Items.GetWeaponByName("Dark Seal");
+                    Players.Data[ctx.User.Id] = new()
+                    {
+                        MainWeapon = startingItem
+                    };
+                    Players.Data[ctx.User.Id].AddStatsFromItem(startingItem);
+                    await req.DeleteAllReactionsAsync();
+                    await req.ModifyAsync(
+                        msg.WithDescription("You have decided to begin your journey as a Battlemage; durable AND flashy!")
+                        .ClearFields()
+                        .WithColor(DefGreen)
+                        .Build());
                 }
             }
             else
             {
                 await req.DeleteAllReactionsAsync();
-                await req.ModifyAsync(msg
-                    .WithColor(DefRed)
+                await req.ModifyAsync(
+                    msg.WithColor(DefRed)
                     .WithDescription("Timed out - no changes were made")
                     .ClearFields()
                     .Build());

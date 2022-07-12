@@ -1,0 +1,24 @@
+{
+	"Name":"Doran's Blade",
+	"Description":"Your first ever. Not bad.",
+	"Rarity":0,
+	"Type":2,
+	"Value":10,
+	"UseEffect":0,
+	"Stats": {
+		"MaxHealth":25,
+		"MaxMana":0,
+		"AttackDamage":12,
+		"AbilityPower":0,
+		"CritChance":0,
+		"CritDamage":0,
+		"ArmorPenPercent":0,
+		"ArmorPenFlat":0,
+		"MagicPenPercent":0,
+		"MagicPenFlat":0,
+		"Omnivamp":5,
+		"Armor":0,
+		"MagicResist":0,
+		"Effect":null
+	}
+}

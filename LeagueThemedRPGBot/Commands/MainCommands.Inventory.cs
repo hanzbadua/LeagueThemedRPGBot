@@ -38,7 +38,7 @@ namespace LeagueThemedRPGBot.Commands
         }
 
         [Command("inventory"), Description("View an item in your inventory via index")]
-        public async Task Inventory(CommandContext ctx, [Description("Inventory index of the item to equip")] int count)
+        public async Task Inventory(CommandContext ctx, [Description("Inventory index of the item to view")] int count)
         {
             if (!await PlayerIsInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;

@@ -266,6 +266,9 @@ namespace LeagueThemedRPGBot.Commands
             int enemyEffectiveAr = e.Armor - (e.Armor * pl.ArmorPenPercent / 100) - pl.ArmorPenFlat;
             int enemyEffectiveMr = e.MagicResist - (e.Armor * pl.MagicPenPercent / 100) - pl.MagicPenFlat;
 
+            if (enemyEffectiveAr <= 0) enemyEffectiveAr = 0;
+            if (enemyEffectiveMr <= 0) enemyEffectiveMr = 0;
+
             var embed = new DiscordEmbedBuilder
             {
                 Title = $"Encounter: {e.Name}",

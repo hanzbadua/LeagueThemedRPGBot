@@ -1,0 +1,24 @@
+{
+	"Name":"Dark Seal",
+	"Description":"Evil, yet powerful. You don't know how, you only know you have it now.",
+	"Rarity":0,
+	"Type":2,
+	"Value":10,
+	"UseEffect":0,
+	"Stats": {
+		"MaxHealth":15,
+		"MaxMana":10,
+		"AttackDamage":0,
+		"AbilityPower":15,
+		"CritChance":0,
+		"CritDamage":0,
+		"ArmorPenPercent":0,
+		"ArmorPenFlat":0,
+		"MagicPenPercent":0,
+		"MagicPenFlat":0,
+		"Omnivamp":3,
+		"Armor":0,
+		"MagicResist":0,
+		"Effect":null
+	}
+}
