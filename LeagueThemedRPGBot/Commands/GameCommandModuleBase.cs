@@ -10,7 +10,7 @@ namespace LeagueThemedRPGBot.Commands
         // We DON'T call assign new() to these properties as dependency injection with handle a concurrent singleton instance
         // for all of our instantiated command modules inheriting GameCommandModuleBase
         public PlayerData Players { protected get; set; }
-        public ItemData Items { protected get; set; } 
+        public Data Items { protected get; set; } 
         public Random Rng { protected get; set; }
 
         public override async Task AfterExecutionAsync(CommandContext ctx)
@@ -49,7 +49,18 @@ namespace LeagueThemedRPGBot.Commands
             // Inventory is empty check
             if (!Players.Data[ctx.User.Id].Inventory.Any())
             {
-                await ctx.RespondAsync("Your inventory is empty!");
+                await ctx.RespondAsync("Your inventory is empty");
+                return true;
+            }
+
+            return false;
+        }
+
+        protected async Task<bool> SkillsIsEmpty(CommandContext ctx)
+        {
+            if (!Players.Data[ctx.User.Id].Inventory.Any())
+            {
+                await ctx.RespondAsync("You have no unused skills to view");
                 return true;
             }
 
@@ -63,6 +74,17 @@ namespace LeagueThemedRPGBot.Commands
             if (Players.Data[ctx.User.Id].Inventory.ElementAtOrDefault(index) is null)
             {
                 await ctx.RespondAsync($"There is no valid item in inventory index {index+1}"); // count is index+1
+                return false;
+            }
+
+            return true;
+        }
+
+        protected async Task<bool> KnownSkillIndexIsValid(CommandContext ctx, int index)
+        {
+            if (Players.Data[ctx.User.Id].KnownSkills.ElementAtOrDefault(index) is null)
+            {
+                await ctx.RespondAsync($"There is no valid item in unused skill collection index {index + 1}"); // count is index+1
                 return false;
             }
 
@@ -136,13 +158,13 @@ namespace LeagueThemedRPGBot.Commands
             {
                 if (stype == ItemSlot.ArmorOne)
                 {
-                    var current = pl.ArmorOne;
+                    var current = pl.Armor1;
 
                     await ctx.RespondAsync($"You already have armor equipped in slot one ({current.Name}) - respond with *confirm* to replace");
                     var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "confirm");
                     if (!rr.TimedOut)
                     {
-                        Players.Data[ctx.User.Id].ArmorOne = item;
+                        Players.Data[ctx.User.Id].Armor1 = item;
                         Players.Data[ctx.User.Id].AddStatsFromItem(item);
                         Players.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
@@ -155,13 +177,13 @@ namespace LeagueThemedRPGBot.Commands
                 }
                 else if (stype == ItemSlot.ArmorTwo)
                 {
-                    var current = pl.ArmorTwo;
+                    var current = pl.Armor2;
 
                     await ctx.RespondAsync($"You already have armor equipped in slot two ({current.Name}) - respond with *confirm* to replace");
                     var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "confirm");
                     if (!rr.TimedOut)
                     {
-                        Players.Data[ctx.User.Id].ArmorTwo = item;
+                        Players.Data[ctx.User.Id].Armor2 = item;
                         Players.Data[ctx.User.Id].AddStatsFromItem(item);
                         Players.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
@@ -174,13 +196,13 @@ namespace LeagueThemedRPGBot.Commands
                 }
                 else if (stype == ItemSlot.ArmorThree)
                 {
-                    var current = pl.ArmorThree;
+                    var current = pl.Armor3;
 
                     await ctx.RespondAsync($"You already have armor equipped in slot three ({current.Name}) - respond with *confirm* to replace");
                     var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "confirm");
                     if (!rr.TimedOut)
                     {
-                        Players.Data[ctx.User.Id].ArmorThree = item;
+                        Players.Data[ctx.User.Id].Armor3 = item;
                         Players.Data[ctx.User.Id].AddStatsFromItem(item);
                         Players.Data[ctx.User.Id].RemoveStatsFromItem(current);
                         Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
@@ -197,23 +219,23 @@ namespace LeagueThemedRPGBot.Commands
         // Use after checking if the respective item slot is null (aka empty)
         protected async Task UnequipLogic(CommandContext ctx, ItemSlot slot)
         {
-            Item i = ItemData.FailsafeLongSword; // failsafe should never be used.
+            Item i = new Item(); // failsafe should never be used.
 
             switch (slot)
             {
                 case ItemSlot.ArmorOne:
-                    i = Players.Data[ctx.User.Id].ArmorOne;
-                    Players.Data[ctx.User.Id].ArmorOne = null;
+                    i = Players.Data[ctx.User.Id].Armor1;
+                    Players.Data[ctx.User.Id].Armor1 = null;
                     await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armorone`");
                     break;
                 case ItemSlot.ArmorTwo:
-                    i = Players.Data[ctx.User.Id].ArmorTwo;
-                    Players.Data[ctx.User.Id].ArmorTwo = null;
+                    i = Players.Data[ctx.User.Id].Armor2;
+                    Players.Data[ctx.User.Id].Armor2 = null;
                     await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armortwo`");
                     break;
                 case ItemSlot.ArmorThree:
-                    i = Players.Data[ctx.User.Id].ArmorThree;
-                    Players.Data[ctx.User.Id].ArmorThree = null;
+                    i = Players.Data[ctx.User.Id].Armor3;
+                    Players.Data[ctx.User.Id].Armor3 = null;
                     await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armorthree`");
                     break;
                 case ItemSlot.MainWeapon:
@@ -237,6 +259,7 @@ namespace LeagueThemedRPGBot.Commands
             Players.Data[ctx.User.Id].RemoveStatsFromItem(i);
         }
 
+        // Main combat cycle
         protected async Task CombatRoutine(CommandContext ctx, Enemy e)
         {
             var pl = Players.Data[ctx.User.Id];

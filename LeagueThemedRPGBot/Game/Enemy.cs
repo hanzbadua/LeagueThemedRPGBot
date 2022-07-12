@@ -2,13 +2,13 @@
 {
     public class Enemy
     {
-        public string Name { get; set; }
-        public int MaxHealth { get; set; }
-        public int Health { get; set; }
-        public int AttackDamage { get; set; }
-        public int AbilityPower { get; set; }
-        public int Armor { get; set; }
-        public int MagicResist { get; set; }
+        public string Name { get; set; } = "Debug (if you see this something broke)";
+        public int MaxHealth { get; set; } = 5;
+        public int Health { get; set; } = 5;
+        public int AttackDamage { get; set; } = 5;
+        public int AbilityPower { get; set; } = 5;
+        public int Armor { get; set; } = 5;
+        public int MagicResist { get; set; } = 5;
 
         public override string ToString() => Name;
 

@@ -12,7 +12,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("init"), Description("Initialize your character")]
         public async Task Init(CommandContext ctx)
         {
-            var msg = new DiscordEmbedBuilder().WithTitle("Character initialization");
+            var msg = new DiscordEmbedBuilder { Title = "Character initialization"};
 
             if (Players.IsInitedByID(ctx.User.Id))
             {
@@ -100,7 +100,7 @@ namespace LeagueThemedRPGBot.Commands
             await ctx.RespondAsync(msg.Build());
         }
 
-        [Command("equipped"), Description("Check your currently equipped items")]
+        [Command("equipped"), Description("Check your currently equipped items and currently learned skills")]
         public async Task Equipped(CommandContext ctx)
         {
             if (!await PlayerIsInited(ctx)) return;
@@ -111,98 +111,19 @@ namespace LeagueThemedRPGBot.Commands
 
             var msg = new DiscordEmbedBuilder
             {
-                Title = "Equipped Items",
+                Title = "Equipped items + currently learned skills",
                 Color = DefBlue
             };
 
             msg.AddField("Main Weapon", p.MainWeapon is not null ? p.MainWeapon.Name : na)
                 .AddField("Offhand Weapon", p.OffhandWeapon is not null ? p.OffhandWeapon.Name : na)
-                .AddField("Armor (1)", p.ArmorOne is not null ? p.ArmorOne.Name : na)
-                .AddField("Armor (2)", p.ArmorTwo is not null ? p.ArmorTwo.Name : na)
-                .AddField("Armor (3)", p.ArmorThree is not null ? p.ArmorThree.Name : na)
-                .AddField("Boots", p.Boots is not null ? p.Boots.Name : na);
-            await ctx.RespondAsync(msg.Build());
-        }
-
-        [Command("inventory"), Aliases("inv"), Description("View the contents of your inventory")]
-        public async Task Inventory(CommandContext ctx)
-        {
-            if (!await PlayerIsInited(ctx)) return;
-            if (await PlayerIsBusy(ctx)) return;
-            if (await InventoryIsEmpty(ctx)) return;
-
-            var msg = new DiscordEmbedBuilder
-            {
-                Title = "Inventory",
-                Color = DefBlue
-            };
-
-            string contents = "";
-            int index = 1;
-
-            foreach (var i in Players.Data[ctx.User.Id].Inventory)
-            {
-                contents += $"{index}. {i.Name} ({Enum.GetName(i.Rarity)}, {Enum.GetName(i.Type)}){Environment.NewLine}";
-                index++;
-            }
-
-            msg.AddField("Contents", contents);
-            await ctx.RespondAsync(msg.Build());
-        }
-
-        [Command("inventory"), Description("View an item in your inventory via index")]
-        public async Task Inventory(CommandContext ctx, [Description("Inventory index of the type to equip")] int count)
-        {
-            if (!await PlayerIsInited(ctx)) return;
-            if (await PlayerIsBusy(ctx)) return;
-            if (await InventoryIsEmpty(ctx)) return;
-            int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
-            if (!await ItemIndexIsValid(ctx, index)) return;
-
-            var item = Players.Data[ctx.User.Id].Inventory[index];
-            var msg = new DiscordEmbedBuilder { Title = "Viewing item", Color = DefBlue };
-            msg.AddField("Name", item.Name)
-                .AddField("Description", item.Description)
-                .AddField("Rarity", Enum.GetName(item.Rarity))
-                .AddField("Type", Enum.GetName(item.Type))
-                .AddField("Value", item.Value != 0 ? item.Value.ToString() : "Worthless");
-
-            if ((item.Type == ItemType.Weapon || item.Type == ItemType.Armor || item.Type == ItemType.Boots) && item.Stats is not null)
-            {
-                if (item.Stats.MaxHealth != 0)
-                    msg.AddField("Max Health", item.Stats.MaxHealth.ToString());
-
-                if (item.Stats.MaxMana != 0)
-                    msg.AddField("Max Mana", item.Stats.MaxMana.ToString());
-
-                if (item.Stats.AttackDamage != 0)
-                    msg.AddField("Attack Damage", item.Stats.AttackDamage.ToString());
-
-                if (item.Stats.AbilityPower != 0)
-                    msg.AddField("Ability Power", item.Stats.AbilityPower.ToString());
-
-                if (item.Stats.CritChance != 0)
-                    msg.AddField("Crit Chance", item.Stats.CritChance.ToString());
-
-                if (item.Stats.CritDamage != 0)
-                    msg.AddField("Bonus Crit Damage", item.Stats.CritDamage.ToString());
-
-                if (item.Stats.ArmorPenPercent != 0 || item.Stats.ArmorPenFlat != 0)
-                    msg.AddField("Armor Pen (flat|%)", $"{item.Stats.ArmorPenFlat} | {item.Stats.ArmorPenPercent}%");
-
-                if (item.Stats.MagicPenPercent != 0 || item.Stats.MagicPenFlat != 0)
-                    msg.AddField("Magic Pen (flat|%)", $"{item.Stats.MagicPenFlat} | {item.Stats.MagicPenPercent}%");
-
-                if (item.Stats.Omnivamp != 0)
-                    msg.AddField("Omnivamp", item.Stats.Omnivamp.ToString());
-
-                if (item.Stats.Armor != 0)
-                    msg.AddField("Armor", item.Stats.Armor.ToString());
-
-                if (item.Stats.MagicResist != 0)
-                    msg.AddField("Magic Resist", item.Stats.MagicResist.ToString());
-            }
-
+                .AddField("Armor (1)", p.Armor1 is not null ? p.Armor1.Name : na)
+                .AddField("Armor (2)", p.Armor2 is not null ? p.Armor2.Name : na)
+                .AddField("Armor (3)", p.Armor3 is not null ? p.Armor3.Name : na)
+                .AddField("Boots", p.Boots is not null ? p.Boots.Name : na)
+                .AddField("Skill (1)", p.Skill1 is not null ? p.Skill1.Name : na)
+                .AddField("Skill (2)", p.Skill2 is not null ? p.Skill2.Name : na)
+                .AddField("Skill (3)", p.Skill3 is not null ? p.Skill3.Name : na);
             await ctx.RespondAsync(msg.Build());
         }
 

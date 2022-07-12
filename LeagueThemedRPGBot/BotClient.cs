@@ -13,7 +13,8 @@ using LeagueThemedRPGBot.Game;
 
 namespace LeagueThemedRPGBot
 {
-    // Todo: implement skill inventory, new weapons + armor, new init (starting classes + items)
+    // Todo: Reimplement inventory methods to use reactions instead of responses, new weapons + armor, new init (starting classes + items)
+    // init currently doesn't work as it needs to be finished, which includes make starting skills, weapons, armor, etc xd
     public class BotClient
     {
         private static async Task Main() => await new BotClient().RunBotAsync();
@@ -54,7 +55,7 @@ namespace LeagueThemedRPGBot
             // dependency injection
             var services = new ServiceCollection()
                 .AddSingleton<PlayerData>()
-                .AddSingleton<ItemData>()
+                .AddSingleton<Data>()
                 .AddSingleton<Random>()
                 .BuildServiceProvider();
 

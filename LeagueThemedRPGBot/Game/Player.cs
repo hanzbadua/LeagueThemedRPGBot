@@ -39,13 +39,13 @@ namespace LeagueThemedRPGBot.Game
         public Item OffhandWeapon { get; set; }
 
         [JsonInclude]
-        public Item ArmorOne { get; set; }
+        public Item Armor1 { get; set; }
 
         [JsonInclude]
-        public Item ArmorTwo { get; set; }
+        public Item Armor2 { get; set; }
 
         [JsonInclude]
-        public Item ArmorThree { get; set; }
+        public Item Armor3 { get; set; }
 
         [JsonInclude]
         public Item Boots { get; set; }

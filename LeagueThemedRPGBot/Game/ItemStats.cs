@@ -21,6 +21,6 @@ namespace LeagueThemedRPGBot.Game
         public int Omnivamp { get; set; } = 0;
         public int Armor { get; set; } = 0;
         public int MagicResist { get; set; } = 0;
-        public ItemEffect Effect { get; set; } = ItemEffect.None;
+        public ItemEffect Effect { get; set; } = null;
     }
 }

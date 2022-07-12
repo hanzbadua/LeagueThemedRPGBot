@@ -2,7 +2,6 @@
 {
     public enum SkillAction : int
     {
-        None = 0, 
-        Damage = 1
+        Damage = 0
     }
 }

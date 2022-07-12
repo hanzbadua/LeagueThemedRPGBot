@@ -1,10 +1,9 @@
 ﻿namespace LeagueThemedRPGBot.Game
 {
-    public class ItemEffect
+    public class SkillEffect
     {
-        public ItemEffectAction Action { get; set; }
+        public SkillAction Action { get; set; }
         public int ScaleValue { get; set; }
         public ScalingType ScaleType { get; set; }
-
     }
 }
