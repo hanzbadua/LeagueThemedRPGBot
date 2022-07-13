@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using LeagueThemedRPGBot.Game;
@@ -19,7 +20,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("dumpdata"), Description("Safely exit the bot client and save data"), RequireOwner]
         public async Task DumpData(CommandContext ctx)
         {
-            var i = JsonSerializer.Serialize(Players.Data);
+            var i = JsonSerializer.Serialize(Players.Data, DataGlobals.SerializationOptions);
             await ctx.RespondAsync(i);
         }
 
@@ -36,10 +37,11 @@ namespace LeagueThemedRPGBot.Commands
                 Value = 10,
                 Stats = new ItemStats
                 {
+                    Effect = ItemEffect.None
                 }
             };
 
-            var j = JsonSerializer.Serialize(i);
+            var j = JsonSerializer.Serialize(i, DataGlobals.SerializationOptions);
 
             await ctx.RespondAsync(j);
         }
@@ -60,7 +62,7 @@ namespace LeagueThemedRPGBot.Commands
                 }
             };
 
-            var j = JsonSerializer.Serialize(i);
+            var j = JsonSerializer.Serialize(i, DataGlobals.SerializationOptions);
 
             await ctx.RespondAsync(j);
         }
@@ -81,9 +83,15 @@ namespace LeagueThemedRPGBot.Commands
                 }
             };
 
-            var j = JsonSerializer.Serialize(i);
+            var j = JsonSerializer.Serialize(i, DataGlobals.SerializationOptions);
 
             await ctx.RespondAsync(j);
+        }
+
+        [Command("genskill"), Description("Generate skill structure and send msg as json"), RequireOwner]
+        public async Task GenSkill(CommandContext ctx)
+        {
+            await ctx.RespondAsync(JsonSerializer.Serialize(new Skill(), DataGlobals.SerializationOptions));
         }
     }
 }

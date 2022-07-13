@@ -46,10 +46,11 @@ namespace LeagueThemedRPGBot.Commands
             {
                 if (res.Result.Emoji == assassinEmoji)
                 {
-                    startingItem = Items.GetWeaponByName("(Barely) Serrated Dirk");
+                    startingItem = Refs.GetWeaponByName("(Barely) Serrated Dirk");
                     Players.Data[ctx.User.Id] = new()
                     {
-                        MainWeapon = startingItem
+                        MainWeapon = startingItem,
+                        Skill1 = Refs.GetSkillByName("Double Slash")
                     };
                     Players.Data[ctx.User.Id].AddStatsFromItem(startingItem);
                     await req.DeleteAllReactionsAsync();
@@ -61,7 +62,7 @@ namespace LeagueThemedRPGBot.Commands
                 }
                 else if (res.Result.Emoji == bruiserEmoji)
                 {
-                    startingItem = Items.GetWeaponByName("Doran's Blade");
+                    startingItem = Refs.GetWeaponByName("Doran's Blade");
                     Players.Data[ctx.User.Id] = new()
                     {
                         MainWeapon = startingItem
@@ -76,7 +77,7 @@ namespace LeagueThemedRPGBot.Commands
                 }
                 else if (res.Result.Emoji == marksmanEmoji)
                 {
-                    startingItem = Items.GetWeaponByName("Toy Noonquiver");
+                    startingItem = Refs.GetWeaponByName("Toy Noonquiver");
                     Players.Data[ctx.User.Id] = new()
                     {
                         MainWeapon = startingItem
@@ -91,7 +92,7 @@ namespace LeagueThemedRPGBot.Commands
                 }
                 else if (res.Result.Emoji == mageEmoji)
                 {
-                    startingItem = Items.GetWeaponByName("Doran's Ring");
+                    startingItem = Refs.GetWeaponByName("Doran's Ring");
                     Players.Data[ctx.User.Id] = new()
                     {
                         MainWeapon = startingItem
@@ -106,7 +107,7 @@ namespace LeagueThemedRPGBot.Commands
                 }
                 else if (res.Result.Emoji == battleMageEmoji)
                 {
-                    startingItem = Items.GetWeaponByName("Dark Seal");
+                    startingItem = Refs.GetWeaponByName("Dark Seal");
                     Players.Data[ctx.User.Id] = new()
                     {
                         MainWeapon = startingItem
@@ -228,7 +229,7 @@ namespace LeagueThemedRPGBot.Commands
             if (!await PlayerIsInited(ctx)) 
                 return;
 
-            Players.Data[ctx.User.Id].Inventory.Add(Items.GetWeaponByName(name));
+            Players.Data[ctx.User.Id].Inventory.Add(Refs.GetWeaponByName(name));
         }
     }
 }

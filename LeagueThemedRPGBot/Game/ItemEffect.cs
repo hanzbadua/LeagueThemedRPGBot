@@ -1,10 +1,8 @@
 ﻿namespace LeagueThemedRPGBot.Game
 {
-    public class ItemEffect
+    public enum ItemEffect : int
     {
-        public ItemEffectAction Action { get; set; }
-        public int ScaleValue { get; set; }
-        public ScalingType ScaleType { get; set; }
-
+        None = 0,
+        MaxHealthPercentDmgPhysical = 1
     }
 }

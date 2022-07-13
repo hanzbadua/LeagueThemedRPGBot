@@ -4,21 +4,20 @@ using System.Text.RegularExpressions;
 
 namespace LeagueThemedRPGBot.Game
 {
-    public static class DataFunctions
+    public static class DataGlobals
     {
         public static async Task SaveFileDataAsync<T>(string location, T data) 
         {
             using var saveData = File.Create(location);
-            await JsonSerializer.SerializeAsync(saveData, data, opt);
+            await JsonSerializer.SerializeAsync(saveData, data, SerializationOptions);
             await saveData.DisposeAsync();
         }
 
         public static void SaveFileData<T>(string location, T data)
         {
             using var saveData = File.Create(location);
-            JsonSerializer.Serialize(saveData, data, opt);
+            JsonSerializer.Serialize(saveData, data, SerializationOptions);
         }
-
         public static T LoadFileData<T>(string location) where T : new()
         {
             // if data file doesn't exist we just assume the bot is starting fresh
@@ -30,7 +29,7 @@ namespace LeagueThemedRPGBot.Game
             }
 
             using var fileData = File.OpenRead(location);
-            return JsonSerializer.Deserialize<T>(fileData, opt);
+            return JsonSerializer.Deserialize<T>(fileData, SerializationOptions);
         }
 
         public static Dictionary<string, T> LoadGameDataFromDirectory<T>(string directoryLocation) where T : new()
@@ -48,7 +47,7 @@ namespace LeagueThemedRPGBot.Game
             foreach (var file in files)
             {
                 using var data = File.OpenRead(file);
-                var ds = JsonSerializer.Deserialize<T>(data, opt);
+                var ds = JsonSerializer.Deserialize<T>(data, SerializationOptions);
                 var key = ds.ToString().RemoveWhitespace().ToLowerInvariant();
                 if (retval.ContainsKey(key)) key += "q";
                 retval.Add(key, ds);
@@ -59,7 +58,7 @@ namespace LeagueThemedRPGBot.Game
                 foreach (var file in Directory.GetFiles(dir))
                 {
                     using var data = File.OpenRead(file);
-                    var ds = JsonSerializer.Deserialize<T>(data, opt);
+                    var ds = JsonSerializer.Deserialize<T>(data, SerializationOptions);
                     var key = ds.ToString().RemoveWhitespace().ToLowerInvariant();
                     if (retval.ContainsKey(key)) key += "q";
                     retval.Add(key, ds);
@@ -74,10 +73,14 @@ namespace LeagueThemedRPGBot.Game
         public static string RemoveWhitespace(this string s)
             => whitespace.Replace(s, string.Empty);
 
-        private static readonly JsonSerializerOptions opt = new()
+        public static JsonSerializerOptions SerializationOptions { get; } = new()
         {
-            ReferenceHandler = ReferenceHandler.Preserve,
-            AllowTrailingCommas = true
+            // May be necessary to set to 'Preserve' if we encounter later issues with serialization
+            // NOTE: SWAPPING THE REFERENCEHANDLER CONTEXT WILL BREAK CURRENTLY SAVED PLAYERDATA
+            ReferenceHandler = ReferenceHandler.IgnoreCycles, 
+            AllowTrailingCommas = true,
+            IncludeFields = false,
+            WriteIndented = true
         };
 
     }

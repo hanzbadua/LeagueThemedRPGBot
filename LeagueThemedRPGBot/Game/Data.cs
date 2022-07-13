@@ -16,11 +16,11 @@
 
         public Data()
         {
-            Weapons = DataFunctions.LoadGameDataFromDirectory<Item>(WeaponDataDirectory);
-            Armors = DataFunctions.LoadGameDataFromDirectory<Item>(ArmorDataDirectory);
-            Boots = DataFunctions.LoadGameDataFromDirectory<Item>(BootsDataDirectory);
-            Enemies = DataFunctions.LoadGameDataFromDirectory<Enemy>(EnemiesDataDirectory);
-            Skills = DataFunctions.LoadGameDataFromDirectory<Skill>(SkillsDataDirectory);
+            Weapons = DataGlobals.LoadGameDataFromDirectory<Item>(WeaponDataDirectory);
+            Armors = DataGlobals.LoadGameDataFromDirectory<Item>(ArmorDataDirectory);
+            Boots = DataGlobals.LoadGameDataFromDirectory<Item>(BootsDataDirectory);
+            Enemies = DataGlobals.LoadGameDataFromDirectory<Enemy>(EnemiesDataDirectory);
+            Skills = DataGlobals.LoadGameDataFromDirectory<Skill>(SkillsDataDirectory);
         }
 
         public Item GetWeaponByName(string name)
@@ -34,8 +34,8 @@
         public Item GetArmorByName(string name)
         {
             name = name.RemoveWhitespace().ToLowerInvariant();
-            if (Boots.ContainsKey(name))
-                return Boots[name];
+            if (Armors.ContainsKey(name))
+                return Armors[name];
 
             return new Item();
         }

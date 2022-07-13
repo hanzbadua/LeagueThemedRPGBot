@@ -1,0 +1,8 @@
+{
+	"Name": "Double Slash",
+	"Description": "Deal two quick slashes to your target, each strike doing base damage equal to 45% total AD, with each strike doing 5% more per 1 flat armor pen",
+	"ManaCost": 5,
+	"Cooldown": 0,
+	"CastRestriction": 0,
+	"Effect": 1
+}

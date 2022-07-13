@@ -12,7 +12,7 @@ namespace LeagueThemedRPGBot.Game
 
         public PlayerData()
         {
-            Data = DataFunctions.LoadFileData<Dictionary<ulong, Player>>(PlayerDataLocation);
+            Data = DataGlobals.LoadFileData<Dictionary<ulong, Player>>(PlayerDataLocation);
         }
 
         public bool IsInitedByID(ulong Id)
@@ -22,7 +22,7 @@ namespace LeagueThemedRPGBot.Game
 
         public async Task SaveAsync()
         {
-            await DataFunctions.SaveFileDataAsync(PlayerDataLocation, Data);
+            await DataGlobals.SaveFileDataAsync(PlayerDataLocation, Data);
         }
 
         public Dictionary<ulong, Player> Data { get; private set; } = new();

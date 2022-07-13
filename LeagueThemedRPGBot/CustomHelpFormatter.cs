@@ -25,36 +25,31 @@ namespace LeagueThemedRPGBot
 
             Message.WithTitle($"Command `{cmd.Name}`")
                 .WithDescription(cmd.Description);
-
-            if (cmd.Overloads.Any())
+            
+            
+            string args = string.Empty;
+            foreach (var i in cmd.Overloads)
             {
-                string args = string.Empty;
-
-                foreach (var i in cmd.Overloads)
+                if (i.Arguments.Count == 0) continue;
+                foreach (var x in i.Arguments.Select(a => $"`{a.Name}` ({a.Description}){Environment.NewLine}"))
                 {
-                    if (i.Arguments.Count == 0) continue;
-                    foreach (var x in i.Arguments.Select(a => $"`{a.Name}` ({a.Description}){Environment.NewLine}"))
-                    {
-                        args += $"{x} ";
-                    }
+                    args += $"{x} ";
                 }
-
-                if (!string.IsNullOrEmpty(args))
-                    Message.AddField("Arguments", args);
             }
-
-            if (cmd.Aliases.Any())
+            
+            if (!string.IsNullOrEmpty(args))
+                Message.AddField("Arguments", args);
+            
+            string aliasesList = string.Empty;
+            
+            foreach (var i in cmd.Aliases)
             {
-                string aliasesList = string.Empty;
-
-                foreach (var i in cmd.Aliases)
-                {
-                    aliasesList += $"`{i}` ";
-                }
-
-                if (!string.IsNullOrEmpty(aliasesList))
-                    Message.AddField("Aliases", aliasesList);
+                aliasesList += $"`{i}` ";
             }
+            
+            if (!string.IsNullOrEmpty(aliasesList))
+                Message.AddField("Aliases", aliasesList);
+            
 
             return this;
         }
@@ -76,7 +71,10 @@ namespace LeagueThemedRPGBot
                 cmds += $"`{i.Name}` ";
             }
 
-            Message.WithDescription(cmds).AddField("Available groups", groups);
+            Message.WithDescription(cmds);
+
+            if (!string.IsNullOrEmpty(groups))
+                Message.AddField("Available groups", groups);
 
             return this;
         }

@@ -13,8 +13,8 @@ namespace LeagueThemedRPGBot.Game
         public int XP { get; set; } = 0;
         public int MaxHealth { get; set; } = 50;
         public int Health { get; set; } = 50;
-        public int MaxMana { get; set; } = 15;
-        public int Mana { get; set; } = 15;
+        public int MaxMana { get; set; } = 10;
+        public int Mana { get; set; } = 10;
         public int AttackDamage { get; set; } = 10;
         public int AbilityPower { get; set; } = 0;
         public int CritChance { get; set; } = 0;

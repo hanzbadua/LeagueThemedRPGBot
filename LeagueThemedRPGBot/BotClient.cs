@@ -14,7 +14,9 @@ using LeagueThemedRPGBot.Game;
 namespace LeagueThemedRPGBot
 {
     // Todo: Reimplement inventory methods to use reactions instead of responses, new weapons + armor, new init (starting classes + items)
-    // init currently doesn't work as it needs to be finished, which includes make starting skills, weapons, armor, etc xd
+    // actual balance
+
+    // enumerates skills in another function, cleanup combat code to be more split into functions and modularized
     public class BotClient
     {
         private static async Task Main() => await new BotClient().RunBotAsync();
