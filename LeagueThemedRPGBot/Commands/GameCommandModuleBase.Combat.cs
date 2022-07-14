@@ -45,7 +45,7 @@ namespace LeagueThemedRPGBot.Commands
                     {
                         var dmglp = Rng.Next(pl.AttackDamage - (pl.AttackDamage * 25 / 100), pl.AttackDamage + (pl.AttackDamage * 25 / 100));
                         bool crit = CriticalStrike(ref dmglp, pl);
-                        PostMitigationsPhysical(ref dmglp, pl, e);
+                        PostEnemyPhysicalMitigations(ref dmglp, pl, e);
 
                         e.Health -= dmglp;
 
@@ -74,7 +74,7 @@ namespace LeagueThemedRPGBot.Commands
                         if (pl.Skill1.Effect == SkillEffect.AssassinDoubleSlash)
                         {
                             var strike = ((pl.AttackDamage * (45 + (5 * pl.ArmorPenFlat))) / 100) * 2;
-                            PostMitigationsPhysical(ref strike, pl, e);
+                            PostEnemyPhysicalMitigations(ref strike, pl, e);
                             e.Health -= strike;
                             if (await CombatCheckVictory(ctx, pl, e, resp, embed)) return;
                             embed.Description = $"You slashed twice precisely, dealing a total of {strike} damage";
@@ -112,7 +112,7 @@ namespace LeagueThemedRPGBot.Commands
         // p = player
         // e = enemy in combat context
 
-        private void PostMitigationsPhysical(ref int modify, Player p, Enemy e)
+        private void PostEnemyPhysicalMitigations(ref int modify, Player p, Enemy e)
         {
             int enemyEffectiveAr = e.Armor - (e.Armor * p.ArmorPenPercent / 100) - p.ArmorPenFlat;
             if (enemyEffectiveAr < 0) enemyEffectiveAr = 0;
@@ -123,7 +123,7 @@ namespace LeagueThemedRPGBot.Commands
 
         }
 
-        private void PostMitigationsMagical(ref int modify, Player p, Enemy e)
+        private void PostEnemyMagicalMitigations(ref int modify, Player p, Enemy e)
         {
             int enemyEffectiveMr = e.MagicResist - (e.MagicResist * p.MagicPenPercent / 100) - p.MagicPenFlat;
             if (enemyEffectiveMr < 0) enemyEffectiveMr = 0;
@@ -150,12 +150,12 @@ namespace LeagueThemedRPGBot.Commands
             int strippedEnemyAr = e.Armor - (e.Armor * p.ArmorPenPercent / 100) - p.ArmorPenFlat;
             int strippedEnemyMr = e.MagicResist - (e.MagicResist * p.MagicPenPercent / 100) - p.MagicPenFlat;
 
-            if (strippedEnemyAr < e.Armor) strippedEnemyAr = e.Armor;
-            if (strippedEnemyMr < e.MagicResist) strippedEnemyMr = e.MagicResist;
+            if (strippedEnemyAr > e.Armor) strippedEnemyAr = 0;
+            if (strippedEnemyMr > e.MagicResist) strippedEnemyMr = 0;
 
             msg.ClearFields()
                 .AddField("Your HP | Damage | Resists", $"{p.Health}/{p.MaxHealth} | {p.AttackDamage} AD, {p.AbilityPower} AP | {p.Armor} AR, {p.MagicResist} MR")
-                .AddField($"{e.Name}'s HP | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR (-{strippedEnemyAr}), {e.MagicResist} MR (-{strippedEnemyMr})");
+                .AddField($"{e.Name}'s HP | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR ({strippedEnemyAr}), {e.MagicResist} MR ({strippedEnemyMr})");
         }
 
         private async Task<bool> CombatCheckLoss(CommandContext ctx, Player p, Enemy e, DiscordMessage toModify, DiscordEmbedBuilder modify)

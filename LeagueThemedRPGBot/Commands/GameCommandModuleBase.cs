@@ -58,7 +58,7 @@ namespace LeagueThemedRPGBot.Commands
 
         protected async Task<bool> SkillsIsEmpty(CommandContext ctx)
         {
-            if (!Players.Data[ctx.User.Id].Inventory.Any())
+            if (!Players.Data[ctx.User.Id].KnownSkills.Any())
             {
                 await ctx.RespondAsync("You have no unused skills to view");
                 return true;
