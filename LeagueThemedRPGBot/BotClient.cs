@@ -42,10 +42,10 @@ namespace LeagueThemedRPGBot
             // instantiate our bot client
             Client = new DiscordClient(config);
 
-            // allow our bot client to be 'interactive'
+            // allow our bot client to be 'interactive' (use respond-by-message, respond-by-reaction)
             Client.UseInteractivity(new InteractivityConfiguration
             {
-                PollBehaviour = PollBehaviour.KeepEmojis,
+                PollBehaviour = PollBehaviour.DeleteEmojis,
                 Timeout = TimeSpan.FromMinutes(1)
             });
 
