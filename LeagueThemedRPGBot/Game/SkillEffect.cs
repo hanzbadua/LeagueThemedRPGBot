@@ -1,5 +1,4 @@
-﻿
-namespace LeagueThemedRPGBot.Game
+﻿namespace LeagueThemedRPGBot.Game
 {
     public enum SkillEffect : int
     {

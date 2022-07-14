@@ -23,7 +23,7 @@ namespace LeagueThemedRPGBot.Commands
 
             foreach (var i in Players.Data[ctx.User.Id].Inventory)
             {
-                contents += $"{index}. {i.Name} ({Enum.GetName(i.Rarity)}, {Enum.GetName(i.Type)}){Environment.NewLine}";
+                contents += $"{index}. {i.Name} ({Enum.GetName(i.Rarity)}, {Enum.GetName(i.Type)}){NL}";
                 index++;
             }
 
@@ -325,7 +325,7 @@ namespace LeagueThemedRPGBot.Commands
             }
             else
             {
-                await ctx.RespondAsync($"{slot} is not a valid unequip slot;{Environment.NewLine}Valid unequip slots: `armorone`, `armortwo`, `armorthree`, `boots`, `mainweapon`, `offhandweapon`");
+                await ctx.RespondAsync($"{slot} is not a valid unequip slot;{NL}Valid unequip slots: `armorone`, `armortwo`, `armorthree`, `boots`, `mainweapon`, `offhandweapon`");
             }
         }
     }

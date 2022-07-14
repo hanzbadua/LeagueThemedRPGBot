@@ -46,7 +46,7 @@ namespace LeagueThemedRPGBot
             Client.UseInteractivity(new InteractivityConfiguration
             {
                 PollBehaviour = PollBehaviour.KeepEmojis,
-                Timeout = TimeSpan.FromSeconds(25)
+                Timeout = TimeSpan.FromMinutes(1)
             });
 
             // register events related to our client

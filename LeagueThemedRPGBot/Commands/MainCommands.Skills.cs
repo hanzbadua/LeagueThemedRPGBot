@@ -20,7 +20,7 @@ namespace LeagueThemedRPGBot.Commands
 
             foreach (var i in Players.Data[ctx.User.Id].KnownSkills)
             {
-                contents += $"{index}. {i.Name}{Environment.NewLine}";
+                contents += $"{index}. {i.Name}{NL}";
                 index++;
             }
 

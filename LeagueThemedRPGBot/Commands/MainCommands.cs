@@ -167,7 +167,7 @@ namespace LeagueThemedRPGBot.Commands
             msg.AddField("Magic Pen", $"{p.MagicPenFlat} flat | {p.MagicPenPercent}%");
             msg.AddField("Omnivamp", $"{p.Omnivamp}%");
             msg.AddField("Resistances", $"{p.Armor} armor | {p.MagicResist} magic resist");
-            msg.WithFooter($"to check your inventory, use '$inventory'{Environment.NewLine}to check your gold, use '$balance'{Environment.NewLine}to check your equipped items, use '$equipped'");
+            msg.WithFooter($"to check your inventory, use '$inventory'{NL}to check your gold, use '$balance'{NL}to check your equipped items, use '$equipped'");
 
             await ctx.RespondAsync(msg.Build());
         }
