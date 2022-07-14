@@ -45,9 +45,6 @@ namespace LeagueThemedRPGBot.Game
         public Item Armor2 { get; set; }
 
         [JsonInclude]
-        public Item Armor3 { get; set; }
-
-        [JsonInclude]
         public Item Boots { get; set; }
 
         [JsonInclude]

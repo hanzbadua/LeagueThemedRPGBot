@@ -42,16 +42,14 @@ namespace LeagueThemedRPGBot.Commands
                 {
                     if (result.Result.Emoji == swordEmoji)
                     {
-                        var dmglp = Rng.Next(pl.AttackDamage - (pl.AttackDamage * 25 / 100), pl.AttackDamage + (pl.AttackDamage * 25 / 100));
-                        bool crit = CriticalStrike(ref dmglp, pl);
-                        PostEnemyPhysicalMitigations(ref dmglp, pl, e);
+                        GetBasicAttack(pl, e, out bool crit, out int aa);
 
-                        e.Health -= dmglp;
+                        e.Health -= aa;
 
                         if (crit)
-                            embed.Description = $"You critically striked {e.Name} for {dmglp} damage!";
+                            embed.Description = $"You critically striked {e.Name} for {aa} damage!";
                         else
-                            embed.Description = $"You deal {dmglp} damage to {e.Name}";
+                            embed.Description = $"You deal {aa} damage to {e.Name}";
 
                         await resp.DeleteReactionAsync(swordEmoji, ctx.User);
                     }
@@ -135,6 +133,15 @@ namespace LeagueThemedRPGBot.Commands
         }
 
         // other combat related functions idk read the method names
+        private void GetBasicAttack(Player p, Enemy e, out bool wasCrit, out int result)
+        {
+            var aa = Rng.Next(p.AttackDamage - (p.AttackDamage * 25 / 100), p.AttackDamage + (p.AttackDamage * 25 / 100));
+            wasCrit = CriticalStrike(ref aa, p);
+            PostEnemyPhysicalMitigations(ref aa, p, e);
+            result = aa;
+        }
+
+
         private void SkillEffectActions(SkillEffect s, Player p, Enemy e, DiscordEmbedBuilder toModify)
         {
             int dmg;

@@ -19,16 +19,16 @@ namespace LeagueThemedRPGBot.Commands
         }
 
         // not a command
-        // append 'if (!await PlayerIsInited(ctx)) return;' to the prologue of all game-related methods
-        protected async Task<bool> PlayerIsInited(CommandContext ctx)
+        // append 'if (await PlayerIsInited(ctx)) return;' to the prologue of all game-related methods
+        protected async Task<bool> PlayerIsNotInited(CommandContext ctx)
         {
             if (!Players.IsInitedByID(ctx.User.Id))
             {
                 await ctx.RespondAsync("You don't seem to exist in the player database - have you initialized? `$init`");
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         // initcheck this first
@@ -84,7 +84,7 @@ namespace LeagueThemedRPGBot.Commands
         {
             if (Players.Data[ctx.User.Id].KnownSkills.ElementAtOrDefault(index) is null)
             {
-                await ctx.RespondAsync($"There is no valid item in unused skill collection index {index + 1}"); // count is index+1
+                await ctx.RespondAsync($"There is no valid item in unused skill collection index {index+1}"); // count is index+1
                 return false;
             }
 
@@ -194,69 +194,7 @@ namespace LeagueThemedRPGBot.Commands
                         await ctx.RespondAsync("Timed out - no changes were made");
                     return;
                 }
-                else if (stype == ItemSlot.ArmorThree)
-                {
-                    var current = pl.Armor3;
-
-                    await ctx.RespondAsync($"You already have armor equipped in slot three ({current.Name}) - respond with *confirm* to replace");
-                    var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "confirm");
-                    if (!rr.TimedOut)
-                    {
-                        Players.Data[ctx.User.Id].Armor3 = item;
-                        Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                        Players.Data[ctx.User.Id].RemoveStatsFromItem(current);
-                        Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                        Players.Data[ctx.User.Id].Inventory.Add(current);
-                        await ctx.RespondAsync("Armor in slot three replaced successfully");
-                    }
-                    else
-                        await ctx.RespondAsync("Timed out - no changes were made");
-                    return;
-                }
             }
-        }
-
-        // Use after checking if the respective item slot is null (aka empty)
-        protected async Task UnequipLogic(CommandContext ctx, ItemSlot slot)
-        {
-            Item i = new Item(); // failsafe should never be used.
-
-            switch (slot)
-            {
-                case ItemSlot.ArmorOne:
-                    i = Players.Data[ctx.User.Id].Armor1;
-                    Players.Data[ctx.User.Id].Armor1 = null;
-                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armorone`");
-                    break;
-                case ItemSlot.ArmorTwo:
-                    i = Players.Data[ctx.User.Id].Armor2;
-                    Players.Data[ctx.User.Id].Armor2 = null;
-                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armortwo`");
-                    break;
-                case ItemSlot.ArmorThree:
-                    i = Players.Data[ctx.User.Id].Armor3;
-                    Players.Data[ctx.User.Id].Armor3 = null;
-                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `armorthree`");
-                    break;
-                case ItemSlot.MainWeapon:
-                    i = Players.Data[ctx.User.Id].MainWeapon;
-                    Players.Data[ctx.User.Id].MainWeapon = null;
-                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `mainweapon`");
-                    break;
-                case ItemSlot.OffhandWeapon:
-                    i = Players.Data[ctx.User.Id].OffhandWeapon;
-                    Players.Data[ctx.User.Id].OffhandWeapon = null;
-                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `offhandweapon`");
-                    break;
-                case ItemSlot.Boots:
-                    i = Players.Data[ctx.User.Id].Boots;
-                    Players.Data[ctx.User.Id].Boots = null;
-                    await ctx.RespondAsync($"Item '{i.Name}' successfully unequipped from slot `boots`");
-                    break;
-            }
-
-            Players.Data[ctx.User.Id].Inventory.Add(i);
-            Players.Data[ctx.User.Id].RemoveStatsFromItem(i);
         }
 
         protected readonly DiscordColor DefGreen = new (55, 255, 119);

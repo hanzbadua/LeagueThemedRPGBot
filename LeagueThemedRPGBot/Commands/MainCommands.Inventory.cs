@@ -4,17 +4,16 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using LeagueThemedRPGBot.Game;
 
-// NOTE redo these methods, lessen inventory code in gamecommandmodulebase
-
 namespace LeagueThemedRPGBot.Commands
 {
     // inventory related cmds
+    // Desperately needs rewrite.
     public partial class MainCommands
     {
         [Command("inventory"), Aliases("inv"), Description("View the contents of your inventory")]
         public async Task Inventory(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             if (await InventoryIsEmpty(ctx)) return;
 
@@ -40,7 +39,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("inventory"), Description("View an item in your inventory via index")]
         public async Task Inventory(CommandContext ctx, [Description("Inventory index of the item to view")] int count)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             if (await InventoryIsEmpty(ctx)) return;
             int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
@@ -94,7 +93,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("equip")]
         public async Task Equip(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             await ctx.RespondAsync("You need to specify an item in your inventory to equip");
         }
@@ -102,7 +101,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("equip"), Description("Equip an item via inventory index")]
         public async Task Equip(CommandContext ctx, [Description("Inventory index of the item to equip")] int count)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             if (await InventoryIsEmpty(ctx)) return;
             int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
@@ -180,7 +179,7 @@ namespace LeagueThemedRPGBot.Commands
                 await ctx.RespondAsync($"Equipping armor '{item.Name}'...");
                 await ctx.RespondAsync($"Respond with *one*, *two*, or *three* to choose what slot to equip {item.Name} in");
 
-                var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "one" || i.Content.ToLowerInvariant() == "two" || i.Content.ToLowerInvariant() == "three");
+                var rr = await ctx.Message.GetNextMessageAsync(i => i.Content.ToLowerInvariant() == "one" || i.Content.ToLowerInvariant() == "two");
                 if (!rr.TimedOut)
                 {
                     if (rr.Result.Content.Contains("one", StringComparison.OrdinalIgnoreCase))
@@ -211,20 +210,6 @@ namespace LeagueThemedRPGBot.Commands
                             await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.ArmorTwo, index);
                         }
                     }
-                    else if (rr.Result.Content.Contains("three", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (player.Armor3 is null)
-                        {
-                            await ctx.RespondAsync($"Equipping {item.Name} in armor slot three...");
-                            Players.Data[ctx.User.Id].Armor3 = item;
-                            Players.Data[ctx.User.Id].AddStatsFromItem(item);
-                            Players.Data[ctx.User.Id].Inventory.RemoveAt(index);
-                        }
-                        else
-                        {
-                            await AlreadyWearingEquipPattern(ctx, player, item, ItemSlot.ArmorThree, index);
-                        }
-                    }
                 }
                 else
                     await ctx.RespondAsync("Timed out - no changes were made");
@@ -236,13 +221,13 @@ namespace LeagueThemedRPGBot.Commands
         [Command("Unequip")]
         public async Task Unequip(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             var msg = new DiscordEmbedBuilder
             {
-                Title = "No Unequip Slot Specified",
+                Title = "No unequip slot specified",
                 Color = DefRed,
-                Description = "Valid unequip slots: `armorone`, `armortwo`, `armorthree`, `boots`, `mainweapon`, `offhandweapon`"
+                Description = "Valid unequip slots: `armor1`, `armor2`, `boots`, `mainweapon`, `offhandweapon`"
             };
 
             await ctx.RespondAsync(msg.Build());
@@ -251,82 +236,105 @@ namespace LeagueThemedRPGBot.Commands
         [Command("Unequip"), Description("Unequip an item in a slot via slot name")]
         public async Task Unequip(CommandContext ctx, [RemainingText][Description("Slot name to unequip")] string slot)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             slot = slot.RemoveWhitespace().ToLowerInvariant();
             var p = Players.Data[ctx.User.Id];
+            Item i = new(); // failsafe new() should never be used :)
 
-            if (slot == "armorone")
+            var noequip = new DiscordEmbedBuilder
+            {
+                Title = $"There's nothing to unequip in slot `{slot}`",
+                Description = "You can use the command `$equipped` to check what you have currently equipped",
+                Color = DefRed
+            }.Build();
+
+            var success = new DiscordEmbedBuilder
+            {
+                Color = DefGreen
+            };
+
+            if (slot == "armor1")
             {
                 if (p.Armor1 is null)
                 {
-                    await ctx.RespondAsync("There's nothing in slot `armorone` to unequip!");
+                    await ctx.RespondAsync(noequip);
                 }
                 else
                 {
-                    await UnequipLogic(ctx, ItemSlot.ArmorOne);
+                    i = p.Armor1;
+                    p.Armor1 = null;
+                    await ctx.RespondAsync(success.WithTitle($"Item '{i.Name}' successfully unequipped from slot {slot}").Build());
                 }
             }
-            else if (slot == "armortwo")
+            else if (slot == "armor2")
             {
                 if (p.Armor2 is null)
                 {
-                    await ctx.RespondAsync("There's nothing in slot `armortwo` to unequip!");
+                    await ctx.RespondAsync(noequip);
                 }
                 else
                 {
-                    await UnequipLogic(ctx, ItemSlot.ArmorTwo);
-                }
-            }
-            else if (slot == "armorthree")
-            {
-                if (p.Armor3 is null)
-                {
-                    await ctx.RespondAsync("There's nothing in slot `armorthree` to unequip!");
-                }
-                else
-                {
-                    await UnequipLogic(ctx, ItemSlot.ArmorThree);
+                    i = p.Armor2;
+                    p.Armor2 = null;
+                    await ctx.RespondAsync(success.WithTitle($"Item '{i.Name}' successfully unequipped from slot {slot}").Build());
                 }
             }
             else if (slot == "mainweapon")
             {
                 if (p.MainWeapon is null)
                 {
-                    await ctx.RespondAsync("There's nothing in slot `mainweapon` to unequip!");
+                    await ctx.RespondAsync(noequip);
                 }
                 else
                 {
-                    await UnequipLogic(ctx, ItemSlot.MainWeapon);
+                    i = p.MainWeapon;
+                    p.MainWeapon = null;
+                    await ctx.RespondAsync(success.WithTitle($"Item '{i.Name}' successfully unequipped from slot {slot}").Build());
                 }
             }
             else if (slot == "offhandweapon")
             {
                 if (p.OffhandWeapon is null)
                 {
-                    await ctx.RespondAsync("There's nothing in slot `offhandweapon` to unequip!");
+                    await ctx.RespondAsync(noequip);
                 }
                 else
                 {
-                    await UnequipLogic(ctx, ItemSlot.OffhandWeapon);
+                    i = p.OffhandWeapon;
+                    p.OffhandWeapon = null;
+                    await ctx.RespondAsync(success.WithTitle($"Item '{i.Name}' successfully unequipped from slot {slot}").Build());
                 }
             }
             else if (slot == "boots")
             {
                 if (p.Boots is null)
                 {
-                    await ctx.RespondAsync("There's nothing in slot `boots` to unequip!");
+                    await ctx.RespondAsync(noequip);
                 }
                 else
                 {
-                    await UnequipLogic(ctx, ItemSlot.Boots);
+                    i = p.Boots;
+                    p.Boots = null;
+                    await ctx.RespondAsync(success.WithTitle($"Item '{i.Name}' successfully unequipped from slot {slot}").Build());
                 }
             }
             else
             {
-                await ctx.RespondAsync($"{slot} is not a valid unequip slot;{NL}Valid unequip slots: `armorone`, `armortwo`, `armorthree`, `boots`, `mainweapon`, `offhandweapon`");
+                var err = new DiscordEmbedBuilder
+                {
+                    Title = "Invalid unequip slot specified",
+                    Description = $"`{slot}` is not a valid unequip slot{NL}Valid unequip slots: `armor1`, `armor2`, `boots`, `mainweapon`, `offhandweapon`",
+                    Color = DefRed
+                };
+
+                await ctx.RespondAsync(err.Build());
+                return;
             }
+
+            p.Inventory.Add(i);
+            p.RemoveStatsFromItem(i);
         }
     }
 }

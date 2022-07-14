@@ -11,7 +11,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("skills"), Description("View your known skill collection")]
         public async Task Skills(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             if (await SkillsIsEmpty(ctx)) return;
 
@@ -37,7 +37,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("skills"), Description("View a skill in your known skills collection")]
         public async Task Skills(CommandContext ctx, [Description("Index of the skill to view")] int count)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             if (await SkillsIsEmpty(ctx)) return;
             int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
@@ -52,7 +52,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("learn")]
         public async Task Learn(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             await ctx.RespondAsync("You need to specify a skill to learn");
         }
@@ -60,7 +60,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("learn"), Description("Learn a skill in your known skills collection")]
         public async Task Learn(CommandContext ctx, [Description("Index of the skill to learn")] int count)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
             if (await SkillsIsEmpty(ctx)) return;
             int index = count - 1; // internal indexes start at 0, for humans it starts at 1, so sub by 1
@@ -170,7 +170,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("unlearn"), Description("Unlearn a currently learned skill and store the skill back in your known skills collection")]
         public async Task Unlearn(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             Players.Data[ctx.User.Id].Busy = true;

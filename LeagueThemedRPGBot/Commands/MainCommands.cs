@@ -136,7 +136,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("balance"), Aliases("bal"), Description("Check your current gold balance")]
         public async Task Balance(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             await ctx.RespondAsync($"Current gold amount: {Players.Data[ctx.User.Id].Gold}");
@@ -145,7 +145,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("stats"), Description("Check your current stats")]
         public async Task Stats(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             var p = Players.Data[ctx.User.Id];
@@ -154,20 +154,19 @@ namespace LeagueThemedRPGBot.Commands
             {
                 Title = "Stats",
                 Color = DefBlue
-            };
-
-            msg.AddField("Level, XP", $"{p.Level}, {p.XP}/{p.CalculateXPForNextLevel()}");
-            msg.AddField("Health", $"{p.Health}/{p.MaxHealth}");
-            msg.AddField("Mana", $"{p.Mana}/{p.MaxMana}");
-            msg.AddField("Attack Damage", p.AttackDamage.ToString());
-            msg.AddField("Ability Power", p.AbilityPower.ToString());
-            msg.AddField("Crit Chance", $"{p.CritChance}%");
-            msg.AddField("Bonus Crit Damage", p.BonusCritDamage != 0 ? $"+{p.BonusCritDamage}%" : "0%");
-            msg.AddField("Armor Pen", $"{p.ArmorPenFlat} flat | {p.ArmorPenPercent}%");
-            msg.AddField("Magic Pen", $"{p.MagicPenFlat} flat | {p.MagicPenPercent}%");
-            msg.AddField("Omnivamp", $"{p.Omnivamp}%");
-            msg.AddField("Resistances", $"{p.Armor} armor | {p.MagicResist} magic resist");
-            msg.WithFooter($"to check your inventory, use '$inventory'{NL}to check your gold, use '$balance'{NL}to check your equipped items, use '$equipped'");
+            }
+            .AddField("Level, XP", $"{p.Level}, {p.XP}/{p.CalculateXPForNextLevel()}")
+            .AddField("Health", $"{p.Health}/{p.MaxHealth}")
+            .AddField("Mana", $"{p.Mana}/{p.MaxMana}")
+            .AddField("Attack Damage", p.AttackDamage.ToString())
+            .AddField("Ability Power", p.AbilityPower.ToString())
+            .AddField("Crit Chance", $"{p.CritChance}%")
+            .AddField("Bonus Crit Damage", p.BonusCritDamage != 0 ? $"+{p.BonusCritDamage}%" : "0%")
+            .AddField("Armor Pen", $"{p.ArmorPenFlat} flat | {p.ArmorPenPercent}%")
+            .AddField("Magic Pen", $"{p.MagicPenFlat} flat | {p.MagicPenPercent}%")
+            .AddField("Omnivamp", $"{p.Omnivamp}%")
+            .AddField("Resistances", $"{p.Armor} armor | {p.MagicResist} magic resist");
+            //.WithFooter($"to check your inventory, use '$inventory'{NL}to check your gold, use '$balance'{NL}to check your equipped items, use '$equipped'");
 
             await ctx.RespondAsync(msg.Build());
         }
@@ -175,7 +174,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("equipped"), Description("Check your currently equipped items and currently learned skills")]
         public async Task Equipped(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             var p = Players.Data[ctx.User.Id];
@@ -191,7 +190,6 @@ namespace LeagueThemedRPGBot.Commands
                 .AddField("Offhand Weapon", p.OffhandWeapon is not null ? p.OffhandWeapon.Name : na)
                 .AddField("Armor (1)", p.Armor1 is not null ? p.Armor1.Name : na)
                 .AddField("Armor (2)", p.Armor2 is not null ? p.Armor2.Name : na)
-                .AddField("Armor (3)", p.Armor3 is not null ? p.Armor3.Name : na)
                 .AddField("Boots", p.Boots is not null ? p.Boots.Name : na)
                 .AddField("Skill (1)", p.Skill1 is not null ? p.Skill1.Name : na)
                 .AddField("Skill (2)", p.Skill2 is not null ? p.Skill2.Name : na)
@@ -202,7 +200,7 @@ namespace LeagueThemedRPGBot.Commands
         [Command("encounter"), Description("Maybe you'll find something worthwhile to fight")]
         public async Task Encounter(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             Players.Data[ctx.User.Id].Busy = true;
@@ -210,24 +208,27 @@ namespace LeagueThemedRPGBot.Commands
             Players.Data[ctx.User.Id].Busy = false;
         }
 
-        [Command("rest"), Description("Resting restores your health and mana back to full")]
+        [Command("rest"), Description("Restores your health and mana back to full")]
         public async Task Rest(CommandContext ctx)
         {
-            if (!await PlayerIsInited(ctx)) return;
+            if (await PlayerIsNotInited(ctx)) return;
             if (await PlayerIsBusy(ctx)) return;
 
             Players.Data[ctx.User.Id].Health = Players.Data[ctx.User.Id].MaxHealth;
             Players.Data[ctx.User.Id].Mana = Players.Data[ctx.User.Id].MaxMana;
 
-            await ctx.RespondAsync("Resting makes you feel good again. Health and mana restored.");
+            await ctx.RespondAsync(new DiscordEmbedBuilder { 
+                Title = "Resting...",
+                Description = "Health and mana has been restored back to full",
+                Color = DefGreen
+            }.Build());
         }
 
         // NOTE: remove later because it is a test command
         [Command("addweapon"), Description("Add an item by name")]
         public async Task AddWeapon(CommandContext ctx, [RemainingText] string name)
         {
-            if (!await PlayerIsInited(ctx)) 
-                return;
+            if (await PlayerIsNotInited(ctx)) return;
 
             Players.Data[ctx.User.Id].Inventory.Add(Refs.GetWeaponByName(name));
         }

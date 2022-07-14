@@ -55,7 +55,7 @@ namespace LeagueThemedRPGBot
         }
         public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> subcommands)
         {
-            Message.WithTitle("Available commands: ");
+            Message.WithTitle("Available commands");
 
             string cmds = string.Empty;
             string groups = string.Empty;
@@ -68,7 +68,7 @@ namespace LeagueThemedRPGBot
                     continue;
                 }
 
-                cmds += $"`{i.Name}` ";
+                cmds += $"`{i.Name}`: {i.Description}{Environment.NewLine}";
             }
 
             Message.WithDescription(cmds);
