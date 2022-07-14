@@ -11,11 +11,6 @@ namespace LeagueThemedRPGBot.Commands
         protected async Task CombatRoutine(CommandContext ctx, Enemy e)
         {
             var pl = Players.Data[ctx.User.Id];
-            int enemyEffectiveAr = e.Armor - (e.Armor * pl.ArmorPenPercent / 100) - pl.ArmorPenFlat;
-            int enemyEffectiveMr = e.MagicResist - (e.Armor * pl.MagicPenPercent / 100) - pl.MagicPenFlat;
-
-            if (enemyEffectiveAr <= 0) enemyEffectiveAr = 0;
-            if (enemyEffectiveMr <= 0) enemyEffectiveMr = 0;
 
             var embed = new DiscordEmbedBuilder
             {
@@ -38,10 +33,8 @@ namespace LeagueThemedRPGBot.Commands
 
             while (true)
             {
-                embed.ClearFields();
                 // Player's turn
-                embed.AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
-                    .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                UpdateDisplayValues(embed, pl, e);
 
             redo:
                 await resp.ModifyAsync(embed.Build()); 
@@ -50,38 +43,23 @@ namespace LeagueThemedRPGBot.Commands
                 {
                     if (result.Result.Emoji == swordEmoji)
                     {
-                        bool crit = false;
-                        var dmglp = Rng.Next(pl.AttackDamage - (pl.AttackDamage * 25 / 100), pl.AttackDamage + (pl.AttackDamage * 25 / 100)) - enemyEffectiveAr;
-                        if (pl.CritChance >= Rng.Next(0, 101))
-                        {
-                            dmglp += (dmglp * (75 + pl.BonusCritDamage) / 100);
-                            crit = true;
-                        }
+                        var dmglp = Rng.Next(pl.AttackDamage - (pl.AttackDamage * 25 / 100), pl.AttackDamage + (pl.AttackDamage * 25 / 100));
+                        bool crit = CriticalStrike(ref dmglp, pl);
+                        PostMitigationsPhysical(ref dmglp, pl, e);
+
                         e.Health -= dmglp;
 
-                        //towrap->method
-                        if (e.Health <= 0)
-                        {
-                            embed.WithDescription($"You won fighting against {e.Name}! Implement rewards here...")
-                                .WithColor(DefGreen)
-                                .ClearFields()
-                                .AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
-                                .AddField("Enemy Health | Damage | Resists", $"{0}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
-                            await resp.ModifyAsync(embed.Build());
-                            return;
-                            //break;
-                        }
+                        if (await CombatCheckVictory(ctx, pl, e, resp, embed)) return;
 
                         if (crit)
-                            embed.Description = $"You critically striked {dmglp} to {e.Name}";
+                            embed.Description = $"You critically striked {e.Name} for {dmglp} damage!";
                         else
-                            embed.Description = $"You deal {dmglp} to {e.Name}";
+                            embed.Description = $"You deal {dmglp} damage to {e.Name}";
 
                         await resp.DeleteReactionAsync(swordEmoji, ctx.User);
                     }
                     else if (result.Result.Emoji == oneEmoji && pl.Skill1 is not null)
                     {
-                        var s = pl.Skill1;
                         if (pl.Mana < pl.Skill1.ManaCost)
                         {
                             embed.Description = $"You don't have enough mana to cast {pl.Skill1.Name}, please choose another action";
@@ -91,23 +69,15 @@ namespace LeagueThemedRPGBot.Commands
 
                         pl.Mana -= pl.Skill1.ManaCost;
 
+                        // WRAP->NEW METHOD. PLS.
+                        // Deal two quick slashes to your target, each strike doing base damage equal to 45% total AD, with each strike doing 5% more per 1 flat armor pen
                         if (pl.Skill1.Effect == SkillEffect.AssassinDoubleSlash)
                         {
-                            var strike = ((pl.AttackDamage * (45 + (5 * pl.ArmorPenFlat))) / 100);
-                            e.Health -= strike * 2;
-                            //towrap->method
-                            if (e.Health <= 0)
-                            {
-                                embed.WithDescription($"You won fighting against {e.Name}! Implement rewards here...")
-                                    .WithColor(DefGreen)
-                                    .ClearFields()
-                                    .AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
-                                    .AddField("Enemy Health | Damage | Resists", $"{0}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
-                                await resp.ModifyAsync(embed.Build());
-                                return;
-                                //break;
-                            }
-                            embed.Description = $"You slashed twice, each slash doing {strike} damage for a total of {strike * 2} damage";
+                            var strike = ((pl.AttackDamage * (45 + (5 * pl.ArmorPenFlat))) / 100) * 2;
+                            PostMitigationsPhysical(ref strike, pl, e);
+                            e.Health -= strike;
+                            if (await CombatCheckVictory(ctx, pl, e, resp, embed)) return;
+                            embed.Description = $"You slashed twice precisely, dealing a total of {strike} damage";
                             await resp.DeleteReactionAsync(oneEmoji, ctx.User);
                         }
                     }
@@ -125,9 +95,7 @@ namespace LeagueThemedRPGBot.Commands
                 embed.Description += Environment.NewLine;
 
                 // Enemy's turn
-                embed.ClearFields();
-                embed.AddField("Your Health | Damage | Resists", $"{pl.Health}/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
-                    .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                UpdateDisplayValues(embed, pl, e);
                 await resp.ModifyAsync(embed.Build());
 
                 var dmg = Rng.Next(e.AttackDamage - (e.AttackDamage * 25 / 100), e.AttackDamage + (e.AttackDamage * 25 / 100)) - pl.Armor;
@@ -139,16 +107,65 @@ namespace LeagueThemedRPGBot.Commands
             }
         }
 
-        private async Task<bool> CombatCheckLoss(CommandContext ctx, Player pl, Enemy e, DiscordMessage toModify, DiscordEmbedBuilder modify)
+        // Functions which help with combat related math
+        // modify = damage number to modify
+        // p = player
+        // e = enemy in combat context
+
+        private void PostMitigationsPhysical(ref int modify, Player p, Enemy e)
         {
-            if (pl.Health <= 0)
+            int enemyEffectiveAr = e.Armor - (e.Armor * p.ArmorPenPercent / 100) - p.ArmorPenFlat;
+            if (enemyEffectiveAr < 0) enemyEffectiveAr = 0;
+            if (modify - enemyEffectiveAr <= 0)
+                modify = 1;
+            else
+                modify -= enemyEffectiveAr;
+
+        }
+
+        private void PostMitigationsMagical(ref int modify, Player p, Enemy e)
+        {
+            int enemyEffectiveMr = e.MagicResist - (e.MagicResist * p.MagicPenPercent / 100) - p.MagicPenFlat;
+            if (enemyEffectiveMr < 0) enemyEffectiveMr = 0;
+            if (modify - enemyEffectiveMr <= 0)
+                modify = 1;
+            else
+                modify -= enemyEffectiveMr;
+        }
+
+        private bool CriticalStrike(ref int modify, Player p)
+        {
+            if (p.CritChance >= Rng.Next(0, 101))
+            {
+                modify += (modify * (75 + p.BonusCritDamage) / 100);
+                return true;
+            }
+
+            return false;
+        }
+
+        // other combat related functions idk read the method names
+        private void UpdateDisplayValues(DiscordEmbedBuilder msg, Player p, Enemy e)
+        {
+            int strippedEnemyAr = e.Armor - (e.Armor * p.ArmorPenPercent / 100) - p.ArmorPenFlat;
+            int strippedEnemyMr = e.MagicResist - (e.MagicResist * p.MagicPenPercent / 100) - p.MagicPenFlat;
+
+            if (strippedEnemyAr < e.Armor) strippedEnemyAr = e.Armor;
+            if (strippedEnemyMr < e.MagicResist) strippedEnemyMr = e.MagicResist;
+
+            msg.ClearFields()
+                .AddField("Your HP | Damage | Resists", $"{p.Health}/{p.MaxHealth} | {p.AttackDamage} AD, {p.AbilityPower} AP | {p.Armor} AR, {p.MagicResist} MR")
+                .AddField($"{e.Name}'s HP | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR (-{strippedEnemyAr}), {e.MagicResist} MR (-{strippedEnemyMr})");
+        }
+
+        private async Task<bool> CombatCheckLoss(CommandContext ctx, Player p, Enemy e, DiscordMessage toModify, DiscordEmbedBuilder modify)
+        {
+            if (p.Health <= 0)
             {
                 modify.WithDescription($"You lost against {e.Name}... you got no rewards")
-                    .WithColor(DefRed)
-                    .ClearFields()
-                    .AddField("Your Health | Damage | Resists", $"0/{pl.MaxHealth} | {pl.AttackDamage} AD, {pl.AbilityPower} AP | {pl.Armor} AR. {pl.MagicResist} MR")
-                    .AddField("Enemy Health | Damage | Resists", $"{e.Health}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
-                Players.Data[ctx.User.Id].Health = pl.MaxHealth / 4;
+                    .WithColor(DefRed);
+                UpdateDisplayValues(modify, p, e);
+                Players.Data[ctx.User.Id].Health = p.MaxHealth / 4;
                 await toModify.ModifyAsync(modify.Build());
                 return true;
             }
@@ -156,5 +173,20 @@ namespace LeagueThemedRPGBot.Commands
             return false;
         }
 
+        private async Task<bool> CombatCheckVictory(CommandContext ctx, Player p, Enemy e, DiscordMessage toModify, DiscordEmbedBuilder modify)
+        {
+            if (e.Health <= 0)
+            {
+                modify.WithDescription($"You won fighting against {e.Name}! Implement rewards here...")
+                    .WithColor(DefGreen)
+                    .ClearFields()
+                    .AddField("Your Health | Damage | Resists", $"{p.Health}/{p.MaxHealth} | {p.AttackDamage} AD, {p.AbilityPower} AP | {p.Armor} AR. {p.MagicResist} MR")
+                    .AddField("Enemy Health | Damage | Resists", $"{0}/{e.MaxHealth} | {e.AttackDamage} AD, {e.AbilityPower} AP | {e.Armor} AR, {e.MagicResist} MR");
+                await toModify.ModifyAsync(modify.Build());
+                return true;
+            }
+
+            return false;
+        }
     }
 }
