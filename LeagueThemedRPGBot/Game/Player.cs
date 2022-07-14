@@ -2,10 +2,15 @@
 
 namespace LeagueThemedRPGBot.Game
 {
+    // For types which you json serialize/deserialize constantly like Player
+    // Use the [JsonSerializable] and specify typeof(any reference types) for serialization performance reasons 
     [JsonSerializable(typeof(Item))]
     [JsonSerializable(typeof(List<Item>))]
     [JsonSerializable(typeof(Skill))]
     [JsonSerializable(typeof(List<Skill>))]
+
+    // Default Player values should be new player values
+    // [JsonInclude] explictly tells JsonSerializer to serialize specific properties, super useful for reference types
     public class Player
     {
         // instanced data
