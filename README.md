@@ -1,8 +1,8 @@
-# NOTE: project closed cuz I don't have the time and effort to continue developing at this rate
-
 # League Themed RPG Bot
 
 Work-in-progress.
+
+Project development rate will be irregular and slow due to my lack of time and effort to continue developing at a consistent rate.
 
 ----
 
